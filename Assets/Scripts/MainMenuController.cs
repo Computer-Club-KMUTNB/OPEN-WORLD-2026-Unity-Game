@@ -7,6 +7,9 @@ public class MainMenuController : MonoBehaviour
     [Tooltip("The name of the scene to load when clicking Start Game")]
     [SerializeField] private string sceneName = "restaurant-scene";
 
+    [Tooltip("The name of the scene to load when clicking Credits")]
+    [SerializeField] private string creditsSceneName = "EndCredit";
+
     private void Awake()
     {
         // Ensure the cursor is unlocked and visible when in the menu
@@ -49,6 +52,21 @@ public class MainMenuController : MonoBehaviour
 
         Debug.Log($"[MainMenuController] Starting game. Loading scene: '{sceneToLoad}'");
         SceneManager.LoadScene(sceneToLoad);
+    }
+
+    /// <summary>
+    /// Loads the credits scene configured in the creditsSceneName serialized field.
+    /// </summary>
+    public void OpenCredits()
+    {
+        if (string.IsNullOrEmpty(creditsSceneName))
+        {
+            Debug.LogError("[MainMenuController] Credits scene name is empty!", this);
+            return;
+        }
+
+        Debug.Log($"[MainMenuController] Opening credits. Loading scene: '{creditsSceneName}'");
+        SceneManager.LoadScene(creditsSceneName);
     }
 
     /// <summary>
