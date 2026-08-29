@@ -1,0 +1,103 @@
+{
+  "gameTitle": "RESTAURANT SIMULATOR",
+  "gameSubtitle": "An Open World Experience",
+  "sections": [
+    {
+      "header": "PROJECT DIRECTION",
+      "roles": [
+        {
+          "roleTitle": "Game Director",
+          "names": [
+            "Director Name"
+          ]
+        },
+        {
+          "roleTitle": "Lead Producer",
+          "names": [
+            "Producer Name"
+          ]
+        }
+      ]
+    },
+    {
+      "header": "PROGRAMMING & SYSTEMS",
+      "roles": [
+        {
+          "roleTitle": "Lead Gameplay Programmer",
+          "names": [
+            "Lead Programmer"
+          ]
+        },
+        {
+          "roleTitle": "Restaurant & AI Mechanics",
+          "names": [
+            "AI Programmer",
+            "Mechanics Developer"
+          ]
+        },
+        {
+          "roleTitle": "UI & Menu Systems",
+          "names": [
+            "UI Programmer"
+          ]
+        }
+      ]
+    },
+    {
+      "header": "ART & VISUAL DESIGN",
+      "roles": [
+        {
+          "roleTitle": "3D Environment & Models",
+          "names": [
+            "3D Environment Artist"
+          ]
+        },
+        {
+          "roleTitle": "Character Design & Animation",
+          "names": [
+            "Character Modeler",
+            "Animator"
+          ]
+        },
+        {
+          "roleTitle": "Lighting & Visual Effects",
+          "names": [
+            "Technical Artist"
+          ]
+        }
+      ]
+    },
+    {
+      "header": "AUDIO & SOUND DESIGN",
+      "roles": [
+        {
+          "roleTitle": "Music Composer",
+          "names": [
+            "Composer Name"
+          ]
+        },
+        {
+          "roleTitle": "Sound Effects & Ambience",
+          "names": [
+            "Sound Designer"
+          ]
+        }
+      ]
+    },
+    {
+      "header": "SPECIAL THANKS",
+      "roles": [
+        {
+          "roleTitle": "Community & Support",
+          "names": [
+            "Computer Club KMUTNB",
+            "Playtesting & Quality Assurance Team",
+            "Unity Community & Asset Creators",
+            "Family & Friends"
+          ]
+        }
+      ]
+    }
+  ],
+  "footer": "THANK YOU FOR PLAYING!"
+}
