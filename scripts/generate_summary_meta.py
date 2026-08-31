@@ -3,7 +3,7 @@ import hashlib
 
 def get_guid(filepath):
     rel = os.path.relpath(filepath).replace('\\', '/').lower()
-    return hashlib.md5(f"openworld2026_salt_{rel}".encode('utf-8')).hexdigest()
+    return hashlib.md5(f"openworld2026_summary_salt_{rel}".encode('utf-8')).hexdigest()
 
 def make_meta(filepath, is_sprite=True, border=(0,0,0,0)):
     guid = get_guid(filepath)
@@ -111,34 +111,24 @@ TextureImporter:
 """
     with open(filepath + ".meta", "w", encoding="utf-8") as f:
         f.write(meta_content)
-    print(f"Generated {filepath}.meta (GUID: {guid}) with textureType: 8")
+    print(f"Generated {filepath}.meta (GUID: {guid})")
 
 def main():
     assets = [
-        # Cute
-        ("Assets/Sprites/PauseMenu/Cute/panel_cute_frame.png", True, (45, 45, 45, 45)),
-        ("Assets/Sprites/PauseMenu/Cute/btn_cute_pink.png", True, (32, 32, 32, 32)),
-        ("Assets/Sprites/PauseMenu/Cute/btn_cute_green.png", True, (32, 32, 32, 32)),
-        ("Assets/Sprites/PauseMenu/Cute/btn_cute_yellow.png", True, (32, 32, 32, 32)),
-        ("Assets/Sprites/PauseMenu/Cute/btn_cute_blue.png", True, (32, 32, 32, 32)),
-        ("Assets/Sprites/PauseMenu/Cute/slider_cute_track.png", True, (30, 20, 30, 20)),
-        ("Assets/Sprites/PauseMenu/Cute/slider_cute_fill.png", True, (30, 20, 30, 20)),
-        ("Assets/Sprites/PauseMenu/Cute/slider_cute_knob.png", True, (0, 0, 0, 0)),
-        ("Assets/Sprites/PauseMenu/Cute/toggle_cute_bg.png", True, (30, 20, 30, 20)),
-        ("Assets/Sprites/PauseMenu/Cute/toggle_cute_check.png", True, (0, 0, 0, 0)),
-        ("Assets/Sprites/PauseMenu/Cute/cute_bg_cozy.jpg", True, (0, 0, 0, 0)),
         # Hunt
-        ("Assets/Sprites/PauseMenu/Hunt/panel_hunt_frame.png", True, (45, 45, 45, 45)),
-        ("Assets/Sprites/PauseMenu/Hunt/btn_hunt_crimson.png", True, (32, 32, 32, 32)),
-        ("Assets/Sprites/PauseMenu/Hunt/btn_hunt_gold.png", True, (32, 32, 32, 32)),
-        ("Assets/Sprites/PauseMenu/Hunt/btn_hunt_iron.png", True, (32, 32, 32, 32)),
-        ("Assets/Sprites/PauseMenu/Hunt/slider_hunt_track.png", True, (30, 20, 30, 20)),
-        ("Assets/Sprites/PauseMenu/Hunt/slider_hunt_fill.png", True, (30, 20, 30, 20)),
-        ("Assets/Sprites/PauseMenu/Hunt/slider_hunt_knob.png", True, (0, 0, 0, 0)),
-        ("Assets/Sprites/PauseMenu/Hunt/toggle_hunt_bg.png", True, (30, 20, 30, 20)),
-        ("Assets/Sprites/PauseMenu/Hunt/toggle_hunt_check.png", True, (0, 0, 0, 0)),
-        ("Assets/Sprites/PauseMenu/Hunt/hunt_ember_particle.png", True, (0, 0, 0, 0)),
-        ("Assets/Sprites/PauseMenu/Hunt/hunt_bg_wilderness.jpg", True, (0, 0, 0, 0)),
+        ("Assets/Sprites/Summary/Hunt/card_loot_bg.png", True, (16, 16, 16, 16)),
+        ("Assets/Sprites/Summary/Hunt/icon_meat.png", True, (0, 0, 0, 0)),
+        ("Assets/Sprites/Summary/Hunt/icon_bone.png", True, (0, 0, 0, 0)),
+        ("Assets/Sprites/Summary/Hunt/icon_venom.png", True, (0, 0, 0, 0)),
+        ("Assets/Sprites/Summary/Hunt/icon_herb.png", True, (0, 0, 0, 0)),
+        ("Assets/Sprites/Summary/Hunt/badge_rank_s.png", True, (0, 0, 0, 0)),
+        # Cute
+        ("Assets/Sprites/Summary/Cute/card_cute_slot.png", True, (18, 18, 18, 18)),
+        ("Assets/Sprites/Summary/Cute/icon_coin.png", True, (0, 0, 0, 0)),
+        ("Assets/Sprites/Summary/Cute/icon_dish.png", True, (0, 0, 0, 0)),
+        ("Assets/Sprites/Summary/Cute/icon_customer.png", True, (0, 0, 0, 0)),
+        ("Assets/Sprites/Summary/Cute/icon_star_gold.png", True, (0, 0, 0, 0)),
+        ("Assets/Sprites/Summary/Cute/icon_star_empty.png", True, (0, 0, 0, 0)),
     ]
     for path, is_sprite, border in assets:
         make_meta(path, is_sprite, border)
