@@ -30,7 +30,7 @@ public class ExpeditionSummaryController : MonoBehaviour
     [SerializeField] private Button mainMenuButton;
 
     [Header("Scene Navigation")]
-    [SerializeField] private string restaurantSceneName = "restaurant-scene";
+    [SerializeField] private string restaurantSceneName = "Dev_Restaurant_Flow";
     [SerializeField] private string mainMenuSceneName = "MainMenu";
 
     private void Awake()

@@ -4,8 +4,10 @@ using System.Collections;
 
 public class PlayerInteraction : MonoBehaviour
 {
+    public static PlayerInteraction Instance { get; private set; }
+
     public Camera playerCamera;
-    public float interactDistance = 3f;
+    public float interactDistance = 3.5f;
     
     [Header("Cooking System")]
     public Image cookingProgressBar; 
@@ -17,104 +19,119 @@ public class PlayerInteraction : MonoBehaviour
     public Sprite[] allFoodSprites; 
     public string[] allFoodNames; 
 
-    [Header("3D Hand System (ใหม่!)")]
+    [Header("3D Hand System")]
     public Transform handPoint; // ตำแหน่งหน้ากล้องที่จะให้โมเดลมาลอยอยู่
     public GameObject[] all3DModels; // โมเดล 3D ของวัตถุดิบและอาหาร
     public string[] all3DModelNames; // ชื่อที่ตรงกับโมเดล (เช่น RawBeef, Steak)
     
     private GameObject currentHeldModel; // ตัวแปรจำว่าตอนนี้เสกโมเดลอะไรถือไว้อยู่
 
+    private void Awake()
+    {
+        Instance = this;
+        if (playerCamera == null)
+        {
+            playerCamera = GetComponentInChildren<Camera>();
+            if (playerCamera == null) playerCamera = Camera.main;
+        }
+    }
+
     void Update()
     {
         // โหมดสูตรโกง
-        if (Input.GetKeyDown(KeyCode.Alpha1)) PickUpFood(0);
+        if (Input.GetKeyDown(KeyCode.Alpha1) && allFoodNames != null && allFoodNames.Length > 0) PickUpFood(0);
 
         if (isCooking) return;
 
-        if (Input.GetMouseButtonDown(0)) 
+        if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.E)) 
         {
+            if (playerCamera == null) playerCamera = Camera.main;
+            if (playerCamera == null) return;
+
             Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f)); 
             RaycastHit hit;
 
             if (Physics.Raycast(ray, out hit, interactDistance))
             {
-                // 1. ถ้ายิงเลเซอร์โดนลูกค้า
-                if (hit.collider.CompareTag("Customer"))
+                // 1. ลูกค้า
+                CustomerAI clickedCustomer = hit.collider.GetComponentInParent<CustomerAI>();
+                if (clickedCustomer != null)
                 {
-                    CustomerAI clickedCustomer = hit.collider.GetComponent<CustomerAI>();
-                    if (clickedCustomer != null)
-                    {
-                        bool serveSuccess = clickedCustomer.ReceiveFood(currentHeldItem); 
-                        if (serveSuccess) ClearHand(); 
-                    }
+                    bool serveSuccess = clickedCustomer.ReceiveFood(currentHeldItem); 
+                    if (serveSuccess) ClearHand(); 
+                    return;
                 }
-                // 2. ถ้ายิงเลเซอร์โดนกล่องวัตถุดิบดิบ
-                else if (hit.collider.CompareTag("IngredientBox"))
-                {
-                    IngredientBox box = hit.collider.GetComponent<IngredientBox>();
-                    if (box != null)
-                    {
-                        bool canTake = box.TryTakeIngredient(); 
 
-                        if (canTake)
-                        {
-                            currentHeldItem = box.ingredientName;
-                            Update3DHeldItem(currentHeldItem);
-                        }
-                        else
-                        {
-                            Debug.Log("ของหมดแล้ว หยิบไม่ได้!");
-                        }
-                    }
-                }
-                // 3. ถ้ายิงเลเซอร์โดนเตาทำอาหาร
-                else if (hit.collider.CompareTag("CookingStation"))
+                // 2. กล่องวัตถุดิบ
+                IngredientBox box = hit.collider.GetComponentInParent<IngredientBox>();
+                if (box != null)
                 {
-                    CookingStation station = hit.collider.GetComponent<CookingStation>();
-                    if (station != null)
+                    bool canTake = box.TryTakeIngredient(); 
+                    if (canTake)
                     {
-                        if (station.hasFinishedFood)
-                        {
-                            station.TakeFinishedFood(this);
-                        }
-                        else if (!station.isCooking && currentHeldItem == station.requiredIngredient)
-                        {
-                            ClearHand(); // เอาของลงเตามือต้องว่าง
-                            station.StartCooking(); 
-                            StartCoroutine(CookRoutine(station.cookTime)); 
-                        }
+                        currentHeldItem = box.ingredientName;
+                        Update3DHeldItem(currentHeldItem);
                     }
-                }
-                // 4. ถ้ายิงเลเซอร์โดนโต๊ะจัดจาน
-                else if (hit.collider.CompareTag("PlateStation"))
-                {
-                    PlateStation plate = hit.collider.GetComponent<PlateStation>();
-                    if (plate != null)
+                    else
                     {
-                        if (plate.finalDish != "" && currentHeldItem == "")
-                        {
-                            plate.TakeFinalDish(this);
-                        }
-                        else if (currentHeldItem != "" && plate.finalDish == "")
-                        {
-                            plate.AddIngredient(currentHeldItem, this);
-                        }
+                        Debug.Log("ของหมดแล้ว หยิบไม่ได้!");
                     }
+                    return;
                 }
-                else if (hit.collider.CompareTag("Computer"))
+
+                // 3. เตาทำอาหาร
+                CookingStation station = hit.collider.GetComponentInParent<CookingStation>();
+                if (station != null)
                 {
-                    ComputerTerminal computer = hit.collider.GetComponent<ComputerTerminal>();
+                    if (station.hasFinishedFood)
+                    {
+                        station.TakeFinishedFood(this);
+                    }
+                    else if (!station.isCooking && currentHeldItem == station.requiredIngredient)
+                    {
+                        ClearHand();
+                        station.StartCooking(); 
+                        StartCoroutine(CookRoutine(station.cookTime)); 
+                    }
+                    return;
+                }
+
+                // 4. โต๊ะจัดจาน
+                PlateStation plate = hit.collider.GetComponentInParent<PlateStation>();
+                if (plate != null)
+                {
+                    if (plate.finalDish != "" && currentHeldItem == "")
+                    {
+                        plate.TakeFinalDish(this);
+                    }
+                    else if (currentHeldItem != "" && plate.finalDish == "")
+                    {
+                        plate.AddIngredient(currentHeldItem, this);
+                    }
+                    return;
+                }
+
+                // 5. คอมพิวเตอร์สั่งซื้อของ
+                ComputerTerminal computer = hit.collider.GetComponentInParent<ComputerTerminal>();
+                if (computer != null || hit.collider.CompareTag("Computer") || hit.collider.name.ToLower().Contains("computer"))
+                {
+                    if (computer == null) computer = hit.collider.GetComponent<ComputerTerminal>() ?? hit.collider.GetComponentInParent<ComputerTerminal>();
                     if (computer != null)
                     {
-                        computer.OrderSupplies(); // สั่งของเข้าสต็อคทันทีที่คลิก
+                        computer.OrderSupplies();
+                        return;
                     }
                 }
-                else if (hit.collider.CompareTag("ShopBell"))
+
+                // 6. กระดิ่งเปิด/ปิดร้าน
+                ShopBell bell = hit.collider.GetComponentInParent<ShopBell>();
+                if (bell != null || hit.collider.CompareTag("ShopBell") || hit.collider.name.ToLower().Contains("bell"))
                 {
-                    ShopBell bell = hit.collider.GetComponentInParent<ShopBell>();
+                    if (bell == null) bell = hit.collider.GetComponent<ShopBell>() ?? hit.collider.GetComponentInParent<ShopBell>();
                     if (bell != null)
                     {
-                        bell.RingBell(); // สั่งให้กระดิ่งดังและสลับสถานะร้าน
+                        bell.RingBell();
+                        return;
                     }
                 }
             }
@@ -122,7 +139,7 @@ public class PlayerInteraction : MonoBehaviour
     }
 
     // เอาไว้เสกโมเดล 3D ขึ้นมาใส่มือ
-    void Update3DHeldItem(string itemName)
+    public void Update3DHeldItem(string itemName)
     {
         // 1. ซ่อน UI รูปภาพ 2D ไปก่อน
         if (handUI != null) handUI.gameObject.SetActive(false);
@@ -130,37 +147,33 @@ public class PlayerInteraction : MonoBehaviour
         // 2. ลบโมเดลเก่าทิ้ง
         if (currentHeldModel != null) Destroy(currentHeldModel);
 
+        if (string.IsNullOrEmpty(itemName) || handPoint == null || all3DModelNames == null) return;
+
         // 3. วนลูปหาโมเดล 3D ที่ชื่อตรงกับของที่เพิ่งหยิบ
         for (int i = 0; i < all3DModelNames.Length; i++)
         {
-            if (all3DModelNames[i] == itemName && all3DModels[i] != null)
+            if (all3DModelNames[i] == itemName && all3DModels != null && i < all3DModels.Length && all3DModels[i] != null)
             {
-                // เสกโมเดลขึ้นมาที่ตำแหน่ง HandPoint
                 currentHeldModel = Instantiate(all3DModels[i], handPoint.position, handPoint.rotation);
-                
-                // สั่งให้เป็นลูกของ HandPoint เพื่อให้มันขยับหันซ้ายขวาตามกล้องผู้เล่น
                 currentHeldModel.transform.SetParent(handPoint); 
                 
-                // ปิดระบบฟิสิกส์ (กันไม่ให้เนื้อหมูกระเด็นชนหน้ากล้อง)
                 Collider col = currentHeldModel.GetComponent<Collider>();
                 if (col != null) col.enabled = false;
                 
                 Rigidbody rb = currentHeldModel.GetComponent<Rigidbody>();
                 if (rb != null) rb.isKinematic = true;
 
-                break; // เจอแล้วหยุดหา
+                break;
             }
         }
     }
-    // ----------------------------------------------------
 
     public void PickUpCookedFood(string foodName, Sprite foodSprite)
     {
         currentHeldItem = foodName;
-        Update3DHeldItem(currentHeldItem); // เรียกให้โชว์โมเดล 3D 
+        Update3DHeldItem(currentHeldItem); 
         
-        // ถ้าจานอาหารสุกยังไม่มีโมเดล 3D โชว์รูป 2D แทน (ระบบสำรอง)
-        if (currentHeldModel == null && handUI != null)
+        if (currentHeldModel == null && handUI != null && foodSprite != null)
         {
             handUI.sprite = foodSprite;
             handUI.gameObject.SetActive(true); 
@@ -171,23 +184,26 @@ public class PlayerInteraction : MonoBehaviour
     {
         currentHeldItem = "";
         if (handUI != null) handUI.gameObject.SetActive(false);
-        if (currentHeldModel != null) Destroy(currentHeldModel); // ลบโมเดล 3D ในมือทิ้ง
+        if (currentHeldModel != null) Destroy(currentHeldModel);
     }
 
     public Sprite GetFoodSprite(string foodName)
     {
+        if (allFoodNames == null || allFoodSprites == null) return null;
         for (int i = 0; i < allFoodNames.Length; i++)
         {
-            if (allFoodNames[i] == foodName) return allFoodSprites[i];
+            if (allFoodNames[i] == foodName && i < allFoodSprites.Length) return allFoodSprites[i];
         }
         return null;
     }
 
-    // ฟังก์ชันสูตรโกง (อันเก่า)
     void PickUpFood(int menuIndex)
     {
-        currentHeldItem = allFoodNames[menuIndex];
-        Update3DHeldItem(currentHeldItem);
+        if (allFoodNames != null && menuIndex < allFoodNames.Length)
+        {
+            currentHeldItem = allFoodNames[menuIndex];
+            Update3DHeldItem(currentHeldItem);
+        }
     }
 
     IEnumerator CookRoutine(float cookTime)
