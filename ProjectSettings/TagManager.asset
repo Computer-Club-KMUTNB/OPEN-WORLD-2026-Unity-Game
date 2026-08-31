@@ -15,6 +15,7 @@ TagManager:
   - CookingStation
   - PlateStation
   - Computer
+  - ShopBell
   layers:
   - Default
   - TransparentFX
