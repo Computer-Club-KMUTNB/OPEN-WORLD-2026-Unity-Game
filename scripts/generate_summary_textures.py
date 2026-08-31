@@ -2,8 +2,8 @@ import os
 import math
 from PIL import Image, ImageDraw, ImageFilter
 
-os.makedirs("Assets/Textures/Summary/Hunt", exist_ok=True)
-os.makedirs("Assets/Textures/Summary/Cute", exist_ok=True)
+os.makedirs("Assets/Sprites/Summary/Hunt", exist_ok=True)
+os.makedirs("Assets/Sprites/Summary/Cute", exist_ok=True)
 
 SCALE = 4
 
@@ -31,7 +31,7 @@ def draw_loot_card():
     rivet_r = 3 * SCALE
     for rx, ry in [(pad*2, pad*2), (w-pad*2, pad*2), (pad*2, h-pad*2), (w-pad*2, h-pad*2)]:
         d.ellipse([rx-rivet_r, ry-rivet_r, rx+rivet_r, ry+rivet_r], fill=(160, 140, 130, 255), outline=(40, 30, 30, 255), width=1*SCALE)
-    save_scaled(img, "Assets/Textures/Summary/Hunt/card_loot_bg.png")
+    save_scaled(img, "Assets/Sprites/Summary/Hunt/card_loot_bg.png")
 
 # 2. Monster Meat Cut Icon (128x128)
 def draw_meat_icon():
@@ -58,7 +58,7 @@ def draw_meat_icon():
     d.ellipse([32*SCALE, 55*SCALE, 60*SCALE, 83*SCALE], fill=(245, 240, 230, 255), outline=(100, 85, 75, 255), width=3*SCALE)
     d.ellipse([40*SCALE, 63*SCALE, 52*SCALE, 75*SCALE], fill=(160, 140, 130, 255))
     
-    save_scaled(img, "Assets/Textures/Summary/Hunt/icon_meat.png")
+    save_scaled(img, "Assets/Sprites/Summary/Hunt/icon_meat.png")
 
 # 3. Beast Bone Icon (128x128)
 def draw_bone_icon():
@@ -82,7 +82,7 @@ def draw_bone_icon():
     d.ellipse([45*SCALE, 75*SCALE, 55*SCALE, 85*SCALE], fill=(160, 20, 30, 220))
     d.ellipse([70*SCALE, 48*SCALE, 78*SCALE, 56*SCALE], fill=(180, 25, 35, 200))
     
-    save_scaled(img, "Assets/Textures/Summary/Hunt/icon_bone.png")
+    save_scaled(img, "Assets/Sprites/Summary/Hunt/icon_bone.png")
 
 # 4. Drake Venom Flask Icon (128x128)
 def draw_venom_icon():
@@ -111,7 +111,7 @@ def draw_venom_icon():
     d.ellipse([70*SCALE, 80*SCALE, 78*SCALE, 88*SCALE], fill=(180, 255, 200, 255))
     d.ellipse([58*SCALE, 90*SCALE, 64*SCALE, 96*SCALE], fill=(180, 255, 200, 255))
     
-    save_scaled(img, "Assets/Textures/Summary/Hunt/icon_venom.png")
+    save_scaled(img, "Assets/Sprites/Summary/Hunt/icon_venom.png")
 
 # 5. Savage Wild Herbs Icon (128x128)
 def draw_herb_icon():
@@ -129,7 +129,7 @@ def draw_herb_icon():
     for bx, by in [(45*SCALE, 45*SCALE), (85*SCALE, 35*SCALE), (75*SCALE, 70*SCALE)]:
         d.ellipse([bx-6*SCALE, by-6*SCALE, bx+6*SCALE, by+6*SCALE], fill=(255, 215, 0, 255), outline=(180, 100, 0, 255), width=2*SCALE)
         
-    save_scaled(img, "Assets/Textures/Summary/Hunt/icon_herb.png")
+    save_scaled(img, "Assets/Sprites/Summary/Hunt/icon_herb.png")
 
 # 6. S-Rank Hunt Badge (140x140)
 def draw_s_rank_badge():
@@ -167,7 +167,7 @@ def draw_s_rank_badge():
     d.arc([42*SCALE, 28*SCALE, 98*SCALE, 78*SCALE], start=120, end=360, fill=(255, 215, 0, 255), width=10*SCALE)
     d.arc([42*SCALE, 62*SCALE, 98*SCALE, 112*SCALE], start=300, end=180, fill=(255, 80, 20, 255), width=10*SCALE)
     
-    save_scaled(img, "Assets/Textures/Summary/Hunt/badge_rank_s.png")
+    save_scaled(img, "Assets/Sprites/Summary/Hunt/badge_rank_s.png")
 
 
 # ==================== CUTE THEME ASSETS ====================
@@ -184,7 +184,7 @@ def draw_cute_slot():
     # Inner highlight line at top
     d.line([(r, 4*SCALE), (w-r, 4*SCALE)], fill=(255, 255, 255, 200), width=2*SCALE)
     
-    save_scaled(img, "Assets/Textures/Summary/Cute/card_cute_slot.png")
+    save_scaled(img, "Assets/Sprites/Summary/Cute/card_cute_slot.png")
 
 # 2. Golden Coin Icon (128x128)
 def draw_coin_icon():
@@ -204,7 +204,7 @@ def draw_coin_icon():
         (56*SCALE, 52*SCALE)
     ], fill=(255, 250, 180, 255), outline=(210, 140, 0, 255), width=2*SCALE)
     
-    save_scaled(img, "Assets/Textures/Summary/Cute/icon_coin.png")
+    save_scaled(img, "Assets/Sprites/Summary/Cute/icon_coin.png")
 
 # 3. Cute Cloche Dish Plate Icon (128x128)
 def draw_dish_icon():
@@ -222,7 +222,7 @@ def draw_dish_icon():
     d.arc([40*SCALE, 10*SCALE, 55*SCALE, 25*SCALE], start=40, end=200, fill=(255, 180, 200, 220), width=3*SCALE)
     d.arc([75*SCALE, 10*SCALE, 90*SCALE, 25*SCALE], start=40, end=200, fill=(255, 180, 200, 220), width=3*SCALE)
     
-    save_scaled(img, "Assets/Textures/Summary/Cute/icon_dish.png")
+    save_scaled(img, "Assets/Sprites/Summary/Cute/icon_dish.png")
 
 # 4. Cute Happy Customer Icon (128x128)
 def draw_customer_icon():
@@ -243,7 +243,7 @@ def draw_customer_icon():
     # Smiling mouth
     d.arc([52*SCALE, 68*SCALE, 76*SCALE, 88*SCALE], start=0, end=180, fill=(200, 50, 70, 255), width=4*SCALE)
     
-    save_scaled(img, "Assets/Textures/Summary/Cute/icon_customer.png")
+    save_scaled(img, "Assets/Sprites/Summary/Cute/icon_customer.png")
 
 # 5. Golden Star for Rating (64x64)
 def draw_star_gold():
@@ -267,7 +267,7 @@ def draw_star_gold():
         shine_pts.append((center + r * math.cos(ang), center + r * math.sin(ang)))
     d.polygon(shine_pts, fill=(255, 245, 130, 255))
     
-    save_scaled(img, "Assets/Textures/Summary/Cute/icon_star_gold.png")
+    save_scaled(img, "Assets/Sprites/Summary/Cute/icon_star_gold.png")
 
 # 6. Star Empty (64x64)
 def draw_star_empty():
@@ -283,7 +283,7 @@ def draw_star_empty():
         pts.append((center + r * math.cos(ang), center + r * math.sin(ang)))
     
     d.polygon(pts, fill=(220, 210, 225, 200), outline=(180, 165, 190, 255), width=2*SCALE)
-    save_scaled(img, "Assets/Textures/Summary/Cute/icon_star_empty.png")
+    save_scaled(img, "Assets/Sprites/Summary/Cute/icon_star_empty.png")
 
 
 def main():

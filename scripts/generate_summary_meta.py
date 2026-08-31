@@ -116,19 +116,19 @@ TextureImporter:
 def main():
     assets = [
         # Hunt
-        ("Assets/Textures/Summary/Hunt/card_loot_bg.png", True, (16, 16, 16, 16)),
-        ("Assets/Textures/Summary/Hunt/icon_meat.png", True, (0, 0, 0, 0)),
-        ("Assets/Textures/Summary/Hunt/icon_bone.png", True, (0, 0, 0, 0)),
-        ("Assets/Textures/Summary/Hunt/icon_venom.png", True, (0, 0, 0, 0)),
-        ("Assets/Textures/Summary/Hunt/icon_herb.png", True, (0, 0, 0, 0)),
-        ("Assets/Textures/Summary/Hunt/badge_rank_s.png", True, (0, 0, 0, 0)),
+        ("Assets/Sprites/Summary/Hunt/card_loot_bg.png", True, (16, 16, 16, 16)),
+        ("Assets/Sprites/Summary/Hunt/icon_meat.png", True, (0, 0, 0, 0)),
+        ("Assets/Sprites/Summary/Hunt/icon_bone.png", True, (0, 0, 0, 0)),
+        ("Assets/Sprites/Summary/Hunt/icon_venom.png", True, (0, 0, 0, 0)),
+        ("Assets/Sprites/Summary/Hunt/icon_herb.png", True, (0, 0, 0, 0)),
+        ("Assets/Sprites/Summary/Hunt/badge_rank_s.png", True, (0, 0, 0, 0)),
         # Cute
-        ("Assets/Textures/Summary/Cute/card_cute_slot.png", True, (18, 18, 18, 18)),
-        ("Assets/Textures/Summary/Cute/icon_coin.png", True, (0, 0, 0, 0)),
-        ("Assets/Textures/Summary/Cute/icon_dish.png", True, (0, 0, 0, 0)),
-        ("Assets/Textures/Summary/Cute/icon_customer.png", True, (0, 0, 0, 0)),
-        ("Assets/Textures/Summary/Cute/icon_star_gold.png", True, (0, 0, 0, 0)),
-        ("Assets/Textures/Summary/Cute/icon_star_empty.png", True, (0, 0, 0, 0)),
+        ("Assets/Sprites/Summary/Cute/card_cute_slot.png", True, (18, 18, 18, 18)),
+        ("Assets/Sprites/Summary/Cute/icon_coin.png", True, (0, 0, 0, 0)),
+        ("Assets/Sprites/Summary/Cute/icon_dish.png", True, (0, 0, 0, 0)),
+        ("Assets/Sprites/Summary/Cute/icon_customer.png", True, (0, 0, 0, 0)),
+        ("Assets/Sprites/Summary/Cute/icon_star_gold.png", True, (0, 0, 0, 0)),
+        ("Assets/Sprites/Summary/Cute/icon_star_empty.png", True, (0, 0, 0, 0)),
     ]
     for path, is_sprite, border in assets:
         make_meta(path, is_sprite, border)
