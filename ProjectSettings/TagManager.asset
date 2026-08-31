@@ -4,6 +4,11 @@
 TagManager:
   serializedVersion: 3
   tags:
+  - Weapon
+  - SecondCamera
+  - BulletSpawn
+  - LevelPart
+  - Dummie
   - Stove
   - Customer
   - IngredientBox
@@ -16,8 +21,8 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
+  - Weapon
+  - Player
   - 
   - 
   - 
