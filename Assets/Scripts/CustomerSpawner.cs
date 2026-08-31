@@ -12,7 +12,7 @@ public class CustomerSpawner : MonoBehaviour
     public bool autoStart = false;    // เริ่มกะทันทีที่โหลดฉากหรือไม่
     public bool isShiftActive = false; // สถานะกะปัจจุบัน
 
-    void Start()
+    void OnEnable()
     {
         try
         {
@@ -33,7 +33,6 @@ public class CustomerSpawner : MonoBehaviour
             isShiftActive = true;
         }
 
-        // เริ่มต้นการเสกลูกค้าแบบวนลูป
         StartCoroutine(SpawnCustomerRoutine());
     }
 
@@ -51,11 +50,12 @@ public class CustomerSpawner : MonoBehaviour
 
     IEnumerator SpawnCustomerRoutine()
     {
-        // ลูปนี้จะทำงานไปเรื่อยๆ ตลอดการเล่นเกม
         while (true)
         {
-            // ถ้ายังไม่เริ่มกะ ให้รอ
-            if (!isShiftActive)
+            DayTimer timer = FindFirstObjectByType<DayTimer>();
+            bool canSpawn = isShiftActive || (timer != null && timer.isShopOpen);
+
+            if (!canSpawn)
             {
                 yield return new WaitForSeconds(0.5f);
                 continue;
@@ -64,10 +64,12 @@ public class CustomerSpawner : MonoBehaviour
             // 1. เช็คก่อนว่ามีโต๊ะว่างเหลือ
             Seat[] allSeats = FindObjectsByType<Seat>(FindObjectsSortMode.None);
             int occupiedCount = 0;
-            
-            foreach (Seat seat in allSeats)
+            if (allSeats != null && allSeats.Length > 0)
             {
-                if (seat != null && seat.isOccupied) occupiedCount++;
+                foreach (Seat seat in allSeats)
+                {
+                    if (seat != null && seat.isOccupied) occupiedCount++;
+                }
             }
 
             // 2. ถ้าเก้าอี้ยังไม่เต็มร้านถึงจะเสกลูกค้าใหม่
@@ -75,19 +77,10 @@ public class CustomerSpawner : MonoBehaviour
             {
                 Vector3 pos = transform.position;
                 Quaternion rot = transform.rotation;
-                try
+                if (spawnPoint != null)
                 {
-                    if (spawnPoint != null)
-                    {
-                        pos = spawnPoint.position;
-                        rot = spawnPoint.rotation;
-                    }
-                }
-                catch (System.Exception)
-                {
-                    spawnPoint = null;
-                    pos = transform.position;
-                    rot = transform.rotation;
+                    pos = spawnPoint.position;
+                    rot = spawnPoint.rotation;
                 }
 
                 Instantiate(customerPrefab, pos, rot);
