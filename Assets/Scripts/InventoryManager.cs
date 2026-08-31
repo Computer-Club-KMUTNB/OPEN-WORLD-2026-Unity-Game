@@ -9,9 +9,9 @@ public class InventoryManager : MonoBehaviour
     public static int globalPorkCount = 0; // Raw Pork
 
     [Header("UI References")]
-    [Tooltip("ลาก MeatCounterText มาใส่ที่ช่องนี้")]
+    [Tooltip("ลาก MeatCounterText จากใต้ Canvas มาใส่")]
     public TextMeshProUGUI meatText;
-    [Tooltip("ลาก PorkCounterText มาใส่ที่ช่องนี้ (ถ้ามี)")]
+    [Tooltip("ลาก PorkCounterText จากใต้ Canvas มาใส่")]
     public TextMeshProUGUI porkText;
 
     [Header("Loot Count")]
@@ -21,7 +21,7 @@ public class InventoryManager : MonoBehaviour
         set
         {
             globalMeatCount = value;
-            UpdateMeatUI();
+            UpdateUI();
         }
     }
 
@@ -31,7 +31,7 @@ public class InventoryManager : MonoBehaviour
         set
         {
             globalPorkCount = value;
-            UpdateMeatUI();
+            UpdateUI();
         }
     }
 
@@ -40,6 +40,7 @@ public class InventoryManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
         else if (Instance != this)
         {
@@ -48,22 +49,24 @@ public class InventoryManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
+        AutoFindUI();
     }
 
     void Start()
     {
-        FindMeatUIIfMissing();
-        UpdateMeatUI();
+        AutoFindUI();
+        UpdateUI();
     }
 
     public void ResetInventory()
     {
         globalMeatCount = 0;
         globalPorkCount = 0;
-        UpdateMeatUI();
+        UpdateUI();
     }
 
-    private void FindMeatUIIfMissing()
+    public void AutoFindUI()
     {
         if (meatText == null)
         {
@@ -71,28 +74,39 @@ public class InventoryManager : MonoBehaviour
             if (obj == null) obj = GameObject.Find("MeatText");
             if (obj != null) meatText = obj.GetComponent<TextMeshProUGUI>();
         }
+
+        if (porkText == null)
+        {
+            GameObject obj = GameObject.Find("PorkCounterText");
+            if (obj == null) obj = GameObject.Find("PorkText");
+            if (obj != null) porkText = obj.GetComponent<TextMeshProUGUI>();
+        }
     }
+
+    public void FindMeatUIIfMissing() => AutoFindUI();
 
     // ฟังก์ชันเพิ่มจำนวนเนื้อวัว
     public void AddMeat(int amount = 1)
     {
         globalMeatCount += amount;
-        UpdateMeatUI();
-        Debug.Log($"🥩 Raw Beef collected +{amount}! Total: {globalMeatCount}");
+        UpdateUI();
+        Debug.Log($"🥩 ได้รับ Meat (Raw Beef) +{amount}! ยอดรวม: {globalMeatCount}");
     }
 
     // ฟังก์ชันเพิ่มจำนวนเนื้อหมู
     public void AddPork(int amount = 1)
     {
         globalPorkCount += amount;
-        UpdateMeatUI();
-        Debug.Log($"🥓 Raw Pork collected +{amount}! Total: {globalPorkCount}");
+        UpdateUI();
+        Debug.Log($"🍖 ได้รับ Pork (Raw Pork) +{amount}! ยอดรวม: {globalPorkCount}");
     }
 
     // อัปเดตข้อความบนจอ
-    public void UpdateMeatUI()
+    public void UpdateMeatUI() => UpdateUI();
+
+    public void UpdateUI()
     {
-        FindMeatUIIfMissing();
+        AutoFindUI();
         if (meatText != null)
         {
             if (globalPorkCount > 0 && porkText == null)
@@ -101,12 +115,13 @@ public class InventoryManager : MonoBehaviour
             }
             else
             {
-                meatText.text = $"Meat: {globalMeatCount}";
+                meatText.text = $"Meat : {globalMeatCount}";
             }
         }
+
         if (porkText != null)
         {
-            porkText.text = $"Pork: {globalPorkCount}";
+            porkText.text = $"Pork : {globalPorkCount}";
         }
     }
 }
