@@ -9,6 +9,11 @@ TagManager:
   - BulletSpawn
   - LevelPart
   - Dummie
+  - Stove
+  - Customer
+  - IngredientBox
+  - CookingStation
+  - PlateStation
   layers:
   - Default
   - TransparentFX
