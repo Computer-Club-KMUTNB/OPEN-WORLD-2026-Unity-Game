@@ -228,8 +228,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
-  m_IsKinematic: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -249,6 +249,7 @@ MonoBehaviour:
   amount: 1
   rotateSpeed: 0
   pickupDelay: 0.25
+  pickupRadius: 2.5
 --- !u!65 &-6794851067080070264
 BoxCollider:
   m_ObjectHideFlags: 0
