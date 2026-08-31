@@ -3,7 +3,6 @@ using TMPro;
 
 public class GameManager : MonoBehaviour
 {
-    // ตัวแปร Singleton เพื่อให้สคริปต์อื่น (เช่น คอมพิวเตอร์ หรือ กล่องสต็อค) เรียกใช้งานได้ง่าย
     public static GameManager Instance;
 
     [Header("ระบบเงิน")]
@@ -15,6 +14,13 @@ public class GameManager : MonoBehaviour
     public int rawPorkStock = 5;   // ได้จากการล่าสัตว์ (ข้ามมาจากอีกฉาก)
     public int rawRiceStock = 5;   // สั่งจากคอมพิวเตอร์
     public int rawVeggieStock = 5;  // สั่งจากคอมพิวเตอร์
+
+    [Header("Summary Stats")]
+    public int customersServedToday = 0;
+    public int dishesCookedToday = 0;
+    public int moneyEarnedToday = 0;
+    public int moneySpentToday = 0;
+    public int tipsEarnedToday = 0;
 
     void Awake()
     {
@@ -36,15 +42,25 @@ public class GameManager : MonoBehaviour
         UpdateMoneyText();
     }
 
-    // ฟังก์ชันเสิร์ฟอาหารและได้เงิน
-    public void ServeFood()
+   // ฟังก์ชันเสิร์ฟอาหาร (รับค่าราคา และทิป)
+    public void RecordFoodServed(int price, int tip)
     {
-        playerMoney += 50; 
+        int totalReceived = price + tip;
+        playerMoney += totalReceived;
         
-        // พอได้เงินสั่งให้อัปเดต UI
-        UpdateMoneyText(); 
-        
-        Debug.Log("Food served! Money: " + playerMoney + " Baht");
+        // บันทึกลงสถิติประจำวัน
+        customersServedToday++;
+        moneyEarnedToday += price;
+        tipsEarnedToday += tip;
+
+        UpdateMoneyText();
+        Debug.Log($"Food Serve! Got money {price} + Tip {tip} Baht");
+    }
+
+    // ฟังก์ชันบันทึกการทำอาหารเสร็จ
+    public void RecordDishCooked()
+    {
+        dishesCookedToday++;
     }
 
     // เปลี่ยนจาก void เป็น public void
@@ -62,24 +78,26 @@ public class GameManager : MonoBehaviour
         if (playerMoney >= amount)
         {
             playerMoney -= amount;
+            moneySpentToday += amount;
             UpdateMoneyText();
             return true;
         }
-        return false; // เงินไม่พอ
+        return false;
     }
 
-    // สำหรับรับเนื้อสัตว์
-    public void AddHuntingLoot(string meatType, int amount)
+    // คำนวณกำไรประจำวัน
+    public int GetNetProfitToday()
     {
-        if (meatType == "RawBeef")
-        {
-            rawBeefStock += amount;
-            Debug.Log("ได้รับเนื้อวัวจากการล่ามาเพิ่ม! สต็อคปัจจุบัน: " + rawBeefStock);
-        }
-        else if (meatType == "RawPork")
-        {
-            rawPorkStock += amount;
-            Debug.Log("ได้รับเนื้อหมูจากการล่ามาเพิ่ม! สต็อคปัจจุบัน: " + rawPorkStock);
-        }
+        return (moneyEarnedToday + tipsEarnedToday) - moneySpentToday;
+    }
+
+    // รีเซ็ตสถิติเพื่อเตรียมใช้ในวันถัดไป
+    public void ResetDailyStats()
+    {
+        customersServedToday = 0;
+        dishesCookedToday = 0;
+        moneyEarnedToday = 0;
+        moneySpentToday = 0;
+        tipsEarnedToday = 0;
     }
 }
