@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6429650}
   m_Layer: 0
   m_Name: hood
-  m_TagString: Untagged
+  m_TagString: LevelPart
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
