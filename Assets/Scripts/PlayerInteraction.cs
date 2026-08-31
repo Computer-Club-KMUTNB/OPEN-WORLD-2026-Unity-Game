@@ -109,6 +109,14 @@ public class PlayerInteraction : MonoBehaviour
                         computer.OrderSupplies(); // สั่งของเข้าสต็อคทันทีที่คลิก
                     }
                 }
+                else if (hit.collider.CompareTag("ShopBell"))
+                {
+                    ShopBell bell = hit.collider.GetComponentInParent<ShopBell>();
+                    if (bell != null)
+                    {
+                        bell.RingBell(); // สั่งให้กระดิ่งดังและสลับสถานะร้าน
+                    }
+                }
             }
         }
     }

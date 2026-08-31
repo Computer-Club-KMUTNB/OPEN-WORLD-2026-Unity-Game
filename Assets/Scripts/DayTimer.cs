@@ -4,22 +4,32 @@ using TMPro;
 public class DayTimer : MonoBehaviour
 {
     [Header("ตั้งค่าเวลา")]
-    public float dayDuration = 180f; // 3 นาที
+    public float dayDuration = 180f; // เวลาใน 1 วัน (เช่น 180 วินาที = 3 นาที)
     private float timeRemaining;
+    public bool isShopOpen = false;  // สถานะเปิด/ปิดร้าน
     private bool isDayEnded = false;
 
-    [Header("UI")]
+    [Header("UI & Systems")]
     public TextMeshProUGUI timerTextUI;
-    public SummaryUI summaryUI;
+    public SummaryUI summaryUI;        // หน้าต่างสรุปผล
+
+    [Header("Customer Spawner")]
+    // 🟢 เปลี่ยนเป็น GameObject จะได้ลากวัตถุจาก Hierarchy มาใส่ได้ทันที!
+    public GameObject customerSpawnerObj; 
 
     void Start()
     {
         timeRemaining = dayDuration;
+        UpdateTimerUI();
+
+        // เริ่มเกมมา ปิดจุดเสกลูกค้าให้ซ่อนไว้ก่อน
+        if (customerSpawnerObj != null) customerSpawnerObj.SetActive(false);
     }
 
     void Update()
     {
-        if (isDayEnded) return;
+        // ถ้าร้านยังไม่เปิด หรือ หมดวันแล้ว ➔ ไม่ต้องนับเวลา
+        if (!isShopOpen || isDayEnded) return;
 
         if (timeRemaining > 0)
         {
@@ -29,7 +39,36 @@ public class DayTimer : MonoBehaviour
         else
         {
             timeRemaining = 0;
-            EndDay();
+            CloseShop(); // หมดเวลา สั่งปิดร้าน
+        }
+    }
+
+    public void OpenShop()
+    {
+        if (isShopOpen) return;
+
+        isShopOpen = true;
+        isDayEnded = false;
+        Debug.Log("🔔 เปิดร้านแล้ว! เริ่มนับเวลาและเรียกลูกค้า");
+
+        // 🟢 เปิดจุดเสกลูกค้าให้ทำงาน
+        if (customerSpawnerObj != null) customerSpawnerObj.SetActive(true);
+    }
+
+    public void CloseShop()
+    {
+        if (isDayEnded) return;
+
+        isShopOpen = false;
+        isDayEnded = true;
+        Debug.Log("🔔 ปิดร้านแล้ว! หยุดรับลูกค้าและเปิดหน้าต่างสรุปผล");
+
+        // 🟢 ปิดจุดเสกลูกค้า ไม่ให้คนเข้ามาเพิ่ม
+        if (customerSpawnerObj != null) customerSpawnerObj.SetActive(false);
+
+        if (summaryUI != null)
+        {
+            summaryUI.ShowSummaryPanel();
         }
     }
 
@@ -40,17 +79,6 @@ public class DayTimer : MonoBehaviour
             int minutes = Mathf.FloorToInt(timeRemaining / 60);
             int seconds = Mathf.FloorToInt(timeRemaining % 60);
             timerTextUI.text = string.Format("Time: {0:00}:{1:00}", minutes, seconds);
-        }
-    }
-
-    void EndDay()
-    {
-        isDayEnded = true;
-        Debug.Log("☀️ หมดเวลากลางวันแล้ว! เปิดหน้าต่างสรุปผล...");
-
-        if (summaryUI != null)
-        {
-            summaryUI.ShowSummaryPanel();
         }
     }
 }

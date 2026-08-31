@@ -15,8 +15,8 @@ public class CustomerAI : MonoBehaviour
     public string[] foodMenuNames; 
     private string currentOrderName = ""; 
 
-    [Header("ระบบความอดทนและทิป")]
-    public Image patienceBar;           // หลอดความอดทน
+    [Header("ระบบความอดทนและทิป (ใหม่!)")]
+    public Image patienceBar;           // หลอดความอดทน (UI Image แบบ Filled)
     public float maxPatienceTime = 30f; // เวลารอสูงสุด
     public float fastServeTime = 10f;   // ถ้าเสิร์ฟทันในเวลานี้ จะได้ทิป
     public int basePrice = 50;          // ราคาอาหารปกติ
@@ -47,7 +47,7 @@ public class CustomerAI : MonoBehaviour
 
     void Update()
     {
-        // เช็คตอนเดินมาถึงโต๊ะ สั่งอาหาร
+        // 1. เช็คตอนเดินมาถึงโต๊ะ สั่งอาหาร
         if (!hasOrdered && !isLeaving && agent.hasPath)
         {
             if (agent.remainingDistance < 0.5f)
@@ -60,12 +60,12 @@ public class CustomerAI : MonoBehaviour
             }
         }
 
-        // ระบบนับเวลารออาหาร
+        // 2. ระบบนับเวลารออาหาร (ใหม่!)
         if (hasOrdered && !hasBeenServed && !isLeaving)
         {
             currentTimer -= Time.deltaTime; // นับเวลาถอยหลัง
 
-            // อัปเดตหลอดความอดทน
+            // อัปเดตหลอดความอดทนบนหัวลูกค้า
             if (patienceBar != null)
             {
                 patienceBar.fillAmount = currentTimer / maxPatienceTime;
@@ -74,21 +74,21 @@ public class CustomerAI : MonoBehaviour
 
                 // เปลี่ยนสีหลอดตามเวลาที่เหลือ
                 if (timeTaken <= fastServeTime)
-                    patienceBar.color = Color.green; // ได้ทิป
+                    patienceBar.color = Color.green; // โซนได้ทิป
                 else if (currentTimer > 10f)
-                    patienceBar.color = Color.yellow; // ปกติ
+                    patienceBar.color = Color.yellow; // โซนปกติ
                 else
-                    patienceBar.color = Color.red;    // ใกล้หมดเวลา
+                    patienceBar.color = Color.red;    // โซนใกล้หมดเวลา (ใกล้โกรธ)
             }
 
-            // หมดความอดทน
+            // ถ้าหมดความอดทน!
             if (currentTimer <= 0)
             {
                 LeaveAngry();
             }
         }
 
-        // เดินออกจากร้าน
+        // 3. เดินออกจากร้าน
         if (isLeaving && agent.hasPath)
         {
             if (agent.remainingDistance < 0.5f)
@@ -146,12 +146,12 @@ public class CustomerAI : MonoBehaviour
                 hasBeenServed = true;
                 if (orderCanvas != null) orderCanvas.SetActive(false);
 
-                // คำนวณทิป
+                // --- คำนวณทิป (ใหม่!) ---
                 float timeTaken = maxPatienceTime - currentTimer;
                 int calculatedTip = (timeTaken <= fastServeTime) ? tipAmount : 0;
 
-                if (calculatedTip > 0) Debug.Log($"ได้ทิป {calculatedTip} บาท");
-                else Debug.Log("ได้ค่าอาหารปกติ");
+                if (calculatedTip > 0) Debug.Log($"⚡ เสิร์ฟไวมาก! ได้ทิป {calculatedTip} บาท");
+                else Debug.Log("👍 เสิร์ฟทันเวลา ได้ค่าอาหารปกติ");
 
                 // ส่งข้อมูลราคาและทิปไปให้ GameManager บันทึก
                 GameManager gm = GameManager.Instance;
@@ -190,14 +190,15 @@ public class CustomerAI : MonoBehaviour
         }
     }
 
-    // ลูกค้าเดินหนี
+    // ฟังก์ชันใหม่: ลูกค้าโกรธเดินหนี
     void LeaveAngry()
     {
         isLeaving = true;
-        Debug.Log(gameObject.name + " รอนานเกินไป เดินออกจากร้านแล้ว");
+        Debug.Log(gameObject.name + " รอนานเกินไป โมโหเดินออกจากร้านแล้ว!");
 
-        if (orderCanvas != null) orderCanvas.SetActive(false);
+        if (orderCanvas != null) orderCanvas.SetActive(false); // ซ่อนป้ายออเดอร์
         
+        // สำคัญมาก: ต้องคืนเก้าอี้ให้ว่าง ลูกค้าคนต่อไปจะได้มานั่งโต๊ะนี้ได้!
         if (mySeat != null) mySeat.isOccupied = false;
 
         if (exitPoint != null)
