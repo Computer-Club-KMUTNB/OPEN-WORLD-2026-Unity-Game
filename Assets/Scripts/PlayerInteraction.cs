@@ -54,10 +54,17 @@ public class PlayerInteraction : MonoBehaviour
                     IngredientBox box = hit.collider.GetComponent<IngredientBox>();
                     if (box != null)
                     {
-                        currentHeldItem = box.ingredientName;
-                        Debug.Log("หยิบวัตถุดิบ: " + currentHeldItem + " ขึ้นมาแล้ว!");
-                        
-                        Update3DHeldItem(currentHeldItem); // เรียกฟังก์ชันแสดงโมเดล 3D
+                        bool canTake = box.TryTakeIngredient(); 
+
+                        if (canTake)
+                        {
+                            currentHeldItem = box.ingredientName;
+                            Update3DHeldItem(currentHeldItem);
+                        }
+                        else
+                        {
+                            Debug.Log("ของหมดแล้ว หยิบไม่ได้!");
+                        }
                     }
                 }
                 // 3. ถ้ายิงเลเซอร์โดนเตาทำอาหาร
@@ -92,6 +99,14 @@ public class PlayerInteraction : MonoBehaviour
                         {
                             plate.AddIngredient(currentHeldItem, this);
                         }
+                    }
+                }
+                else if (hit.collider.CompareTag("Computer"))
+                {
+                    ComputerTerminal computer = hit.collider.GetComponent<ComputerTerminal>();
+                    if (computer != null)
+                    {
+                        computer.OrderSupplies(); // สั่งของเข้าสต็อคทันทีที่คลิก
                     }
                 }
             }
