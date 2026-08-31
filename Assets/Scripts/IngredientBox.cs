@@ -34,7 +34,7 @@ public class IngredientBox : MonoBehaviour
         // เปลี่ยนข้อความบนกล่อง
         stockTextUI.text = ingredientName + "\n" + currentStock;
 
-        // ถ้ารายการไหนหมด ให้เปลี่ยนข้อความตัวหนังสือเป็นสีแดง
+        // เปลี่ยนข้อความตัวหนังสือเป็นสีแดง
         if (currentStock <= 0)
         {
             stockTextUI.color = Color.red;
