@@ -7,9 +7,9 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
 
     // Static persistent backing fields to guarantee 100% data retention across all scenes
-    public static int globalMoney = 250;
-    public static int globalBeef = 5;
-    public static int globalPork = 5;
+    public static int globalMoney = 0;
+    public static int globalBeef = 0;
+    public static int globalPork = 0;
     public static int globalRice = 5;
     public static int globalVeggie = 5;
 

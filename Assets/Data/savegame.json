@@ -1,9 +1,9 @@
 {
-    "playerMoney": 220,
-    "rawBeefStock": 6,
-    "rawPorkStock": 5,
-    "rawRiceStock": 9,
-    "rawVeggieStock": 8,
+    "playerMoney": 0,
+    "rawBeefStock": 2,
+    "rawPorkStock": 0,
+    "rawRiceStock": 5,
+    "rawVeggieStock": 5,
     "dayNumber": 1,
-    "lastSavedTimestamp": "2569-08-31 23:26:12"
+    "lastSavedTimestamp": "2569-08-31 23:43:53"
 }

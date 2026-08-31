@@ -4,9 +4,9 @@ using UnityEngine;
 [System.Serializable]
 public class GameSaveData
 {
-    public int playerMoney = 250;
-    public int rawBeefStock = 5;
-    public int rawPorkStock = 5;
+    public int playerMoney = 0;
+    public int rawBeefStock = 0;
+    public int rawPorkStock = 0;
     public int rawRiceStock = 5;
     public int rawVeggieStock = 5;
     public int dayNumber = 1;
@@ -25,6 +25,31 @@ public static class SaveSystem
             Directory.CreateDirectory(dir);
         }
         return Path.Combine(dir, "savegame.json");
+    }
+
+    public static bool HasSaveFile()
+    {
+        string path = GetSavePath();
+        return File.Exists(path);
+    }
+
+    public static void StartNewGame()
+    {
+        GameManager.globalMoney = 0;
+        GameManager.globalBeef = 0;
+        GameManager.globalPork = 0;
+        GameManager.globalRice = 5;
+        GameManager.globalVeggie = 5;
+        SummaryDataBridge.globalDayNumber = 1;
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.UpdateMoneyText();
+        }
+
+        Save();
+        isInitialized = true;
+        Debug.Log("✨ Started New Game: Money=0, Beef=0, Pork=0, Rice=5, Veggie=5");
     }
 
     public static void Save()
@@ -51,7 +76,7 @@ public static class SaveSystem
         string path = GetSavePath();
         if (!File.Exists(path))
         {
-            Debug.Log("ℹ️ No previous save file found in Assets/Data/. Using default stats.");
+            Debug.Log("ℹ️ No previous save file found in Assets/Data/. Using default initial stats.");
             return false;
         }
 

@@ -1,14 +1,18 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MainMenuController : MonoBehaviour
 {
     [Header("Scene Configuration")]
-    [Tooltip("The name of the scene to load when clicking Start Game")]
-    [SerializeField] private string sceneName = "Dev_Restaurant_Flow";
+    [Tooltip("The name of the scene to load for restaurant")]
+    [SerializeField] private string restaurantSceneName = "Dev_Restaurant_Flow";
 
     [Tooltip("The name of the scene to load when clicking Credits")]
     [SerializeField] private string creditsSceneName = "EndCredit";
+
+    [Header("Buttons")]
+    [SerializeField] private GameObject continueButton;
 
     private void Awake()
     {
@@ -21,37 +25,75 @@ public class MainMenuController : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+
+        UpdateContinueButtonState();
+    }
+
+    private void OnEnable()
+    {
+        UpdateContinueButtonState();
+    }
+
+    public void UpdateContinueButtonState()
+    {
+        bool hasSave = SaveSystem.HasSaveFile();
+        if (continueButton != null)
+        {
+            continueButton.SetActive(hasSave);
+        }
     }
 
     /// <summary>
-    /// Loads the scene configured in the sceneName serialized field.
+    /// Starts a fresh New Game: Money=0, All Meats=0, Vegetable=5, Rice=5, Day=1.
+    /// Saves to savegame.json and loads the restaurant scene.
     /// </summary>
+    public void StartNewGame()
+    {
+        Debug.Log("[MainMenuController] Starting NEW GAME (Money:0, Meats:0, Veggie:5, Rice:5)...");
+        SaveSystem.StartNewGame();
+
+        LoadRestaurantScene();
+    }
+
+    /// <summary>
+    /// Continues existing game by loading savegame.json and going to restaurant scene.
+    /// </summary>
+    public void ContinueGame()
+    {
+        Debug.Log("[MainMenuController] CONTINUING game from save file...");
+        SaveSystem.Load();
+
+        LoadRestaurantScene();
+    }
+
+    // Backwards compatible alias
     public void StartGame()
     {
-        string target = sceneName;
+        StartNewGame();
+    }
+
+    public void StartGame(string targetSceneName)
+    {
+        if (!string.IsNullOrEmpty(targetSceneName))
+        {
+            SceneManager.LoadScene(targetSceneName);
+        }
+        else
+        {
+            LoadRestaurantScene();
+        }
+    }
+
+    private void LoadRestaurantScene()
+    {
+        string target = restaurantSceneName;
         if (!Application.CanStreamedLevelBeLoaded(target))
         {
             target = "restaurant-scene";
         }
 
-        Debug.Log($"[MainMenuController] Starting game. Loading scene: '{target}'");
+        Debug.Log($"[MainMenuController] Loading Restaurant Scene: '{target}'");
         SceneManager.LoadScene(target);
-    }
-
-    /// <summary>
-    /// Overload that allows passing a specific scene name directly.
-    /// </summary>
-    public void StartGame(string targetSceneName)
-    {
-        string sceneToLoad = !string.IsNullOrEmpty(targetSceneName) ? targetSceneName : sceneName;
-        if (string.IsNullOrEmpty(sceneToLoad))
-        {
-            Debug.LogError("[MainMenuController] Scene name is empty!", this);
-            return;
-        }
-
-        Debug.Log($"[MainMenuController] Starting game. Loading scene: '{sceneToLoad}'");
-        SceneManager.LoadScene(sceneToLoad);
     }
 
     /// <summary>
