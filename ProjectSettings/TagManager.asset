@@ -14,6 +14,7 @@ TagManager:
   - IngredientBox
   - CookingStation
   - PlateStation
+  - Computer
   layers:
   - Default
   - TransparentFX
