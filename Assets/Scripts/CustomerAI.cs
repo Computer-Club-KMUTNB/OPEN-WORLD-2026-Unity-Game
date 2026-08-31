@@ -174,7 +174,15 @@ public class CustomerAI : MonoBehaviour
             }
             else
             {
-                Debug.Log($"เสิร์ฟผิดเมนู! สั่ง: {currentOrderName} แต่ได้: {foodInPlayerHand}");
+                if (foodInPlayerHand == "BurntMess")
+                {
+                    Debug.Log("🤢 ลูกค้าโมโหที่ได้อาหารไหม้! เสียความอดทนทันที");
+                    currentTimer = Mathf.Max(0f, currentTimer - 25f);
+                }
+                else
+                {
+                    Debug.Log($"เสิร์ฟผิดเมนู! สั่ง: {currentOrderName} แต่ได้: {foodInPlayerHand}");
+                }
                 return false;
             }
         }

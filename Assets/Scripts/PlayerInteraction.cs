@@ -20,11 +20,11 @@ public class PlayerInteraction : MonoBehaviour
     public string[] allFoodNames; 
 
     [Header("3D Hand System")]
-    public Transform handPoint; // ตำแหน่งหน้ากล้องที่จะให้โมเดลมาลอยอยู่
-    public GameObject[] all3DModels; // โมเดล 3D ของวัตถุดิบและอาหาร
-    public string[] all3DModelNames; // ชื่อที่ตรงกับโมเดล (เช่น RawBeef, Steak)
+    public Transform handPoint;
+    public GameObject[] all3DModels;
+    public string[] all3DModelNames;
     
-    private GameObject currentHeldModel; // ตัวแปรจำว่าตอนนี้เสกโมเดลอะไรถือไว้อยู่
+    private GameObject currentHeldModel;
 
     private void Awake()
     {
@@ -40,6 +40,13 @@ public class PlayerInteraction : MonoBehaviour
     {
         // โหมดสูตรโกง
         if (Input.GetKeyDown(KeyCode.Alpha1) && allFoodNames != null && allFoodNames.Length > 0) PickUpFood(0);
+
+        // กด Q เพื่อทิ้งของในมือ (Discard / Trash)
+        if (Input.GetKeyDown(KeyCode.Q) && !string.IsNullOrEmpty(currentHeldItem))
+        {
+            Debug.Log($"🗑️ ทิ้งของในมือ: {currentHeldItem}");
+            ClearHand();
+        }
 
         if (isCooking) return;
 
@@ -62,7 +69,18 @@ public class PlayerInteraction : MonoBehaviour
                     return;
                 }
 
-                // 2. กล่องวัตถุดิบ
+                // 2. ถังขยะ (Trash Can / Bin)
+                if (hit.collider.CompareTag("Trash") || hit.collider.name.ToLower().Contains("trash") || hit.collider.name.ToLower().Contains("bin"))
+                {
+                    if (!string.IsNullOrEmpty(currentHeldItem))
+                    {
+                        Debug.Log($"🗑️ ทิ้ง {currentHeldItem} ลงถังขยะเรียบร้อย!");
+                        ClearHand();
+                        return;
+                    }
+                }
+
+                // 3. กล่องวัตถุดิบ
                 IngredientBox box = hit.collider.GetComponentInParent<IngredientBox>();
                 if (box != null)
                 {
@@ -79,7 +97,7 @@ public class PlayerInteraction : MonoBehaviour
                     return;
                 }
 
-                // 3. เตาทำอาหาร
+                // 4. เตาทำอาหาร
                 CookingStation station = hit.collider.GetComponentInParent<CookingStation>();
                 if (station != null)
                 {
@@ -93,10 +111,14 @@ public class PlayerInteraction : MonoBehaviour
                         station.StartCooking(); 
                         StartCoroutine(CookRoutine(station.cookTime)); 
                     }
+                    else if (!station.isCooking && currentHeldItem != "")
+                    {
+                        Debug.Log($"⚠️ เตาชนิดนี้ต้องการ: {station.requiredIngredient} (แต่คุณถือ: {currentHeldItem})");
+                    }
                     return;
                 }
 
-                // 4. โต๊ะจัดจาน
+                // 5. โต๊ะจัดจาน
                 PlateStation plate = hit.collider.GetComponentInParent<PlateStation>();
                 if (plate != null)
                 {
@@ -111,7 +133,7 @@ public class PlayerInteraction : MonoBehaviour
                     return;
                 }
 
-                // 5. คอมพิวเตอร์สั่งซื้อของ
+                // 6. คอมพิวเตอร์สั่งซื้อของ
                 ComputerTerminal computer = hit.collider.GetComponentInParent<ComputerTerminal>();
                 if (computer != null || hit.collider.CompareTag("Computer") || hit.collider.name.ToLower().Contains("computer"))
                 {
@@ -123,7 +145,7 @@ public class PlayerInteraction : MonoBehaviour
                     }
                 }
 
-                // 6. กระดิ่งเปิด/ปิดร้าน
+                // 7. กระดิ่งเปิด/ปิดร้าน
                 ShopBell bell = hit.collider.GetComponentInParent<ShopBell>();
                 if (bell != null || hit.collider.CompareTag("ShopBell") || hit.collider.name.ToLower().Contains("bell"))
                 {
@@ -138,32 +160,57 @@ public class PlayerInteraction : MonoBehaviour
         }
     }
 
-    // เอาไว้เสกโมเดล 3D ขึ้นมาใส่มือ
     public void Update3DHeldItem(string itemName)
     {
-        // 1. ซ่อน UI รูปภาพ 2D ไปก่อน
         if (handUI != null) handUI.gameObject.SetActive(false);
-
-        // 2. ลบโมเดลเก่าทิ้ง
         if (currentHeldModel != null) Destroy(currentHeldModel);
 
-        if (string.IsNullOrEmpty(itemName) || handPoint == null || all3DModelNames == null) return;
+        if (string.IsNullOrEmpty(itemName) || handPoint == null) return;
 
-        // 3. วนลูปหาโมเดล 3D ที่ชื่อตรงกับของที่เพิ่งหยิบ
-        for (int i = 0; i < all3DModelNames.Length; i++)
+        // วนลูปหาโมเดล 3D ที่ชื่อตรงกับของที่ถือ
+        if (all3DModelNames != null && all3DModels != null)
         {
-            if (all3DModelNames[i] == itemName && all3DModels != null && i < all3DModels.Length && all3DModels[i] != null)
+            for (int i = 0; i < all3DModelNames.Length; i++)
             {
-                currentHeldModel = Instantiate(all3DModels[i], handPoint.position, handPoint.rotation);
-                currentHeldModel.transform.SetParent(handPoint); 
-                
+                if (all3DModelNames[i] == itemName && i < all3DModels.Length && all3DModels[i] != null)
+                {
+                    currentHeldModel = Instantiate(all3DModels[i], handPoint.position, handPoint.rotation);
+                    currentHeldModel.transform.SetParent(handPoint); 
+                    
+                    Collider col = currentHeldModel.GetComponent<Collider>();
+                    if (col != null) col.enabled = false;
+                    
+                    Rigidbody rb = currentHeldModel.GetComponent<Rigidbody>();
+                    if (rb != null) rb.isKinematic = true;
+
+                    return;
+                }
+            }
+        }
+
+        // กรณีเป็นอาหารไหม้ / BurntMess ที่ไม่มีโมเดลเฉพาะ
+        if (itemName == "BurntMess" && all3DModels != null && all3DModels.Length > 0)
+        {
+            GameObject template = all3DModels[all3DModels.Length - 1] ?? all3DModels[0];
+            if (template != null)
+            {
+                currentHeldModel = Instantiate(template, handPoint.position, handPoint.rotation);
+                currentHeldModel.transform.SetParent(handPoint);
+
+                Renderer[] renderers = currentHeldModel.GetComponentsInChildren<Renderer>();
+                foreach (var r in renderers)
+                {
+                    if (r != null && r.material != null)
+                    {
+                        r.material.color = new Color(0.18f, 0.12f, 0.12f);
+                    }
+                }
+
                 Collider col = currentHeldModel.GetComponent<Collider>();
                 if (col != null) col.enabled = false;
-                
+
                 Rigidbody rb = currentHeldModel.GetComponent<Rigidbody>();
                 if (rb != null) rb.isKinematic = true;
-
-                break;
             }
         }
     }

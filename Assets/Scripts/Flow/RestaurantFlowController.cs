@@ -395,16 +395,27 @@ public class RestaurantFlowController : MonoBehaviour
                 return;
             }
 
+            // Trash Can
+            if (hit.collider.CompareTag("Trash") || hitObj.name.ToLower().Contains("trash") || hitObj.name.ToLower().Contains("bin"))
+            {
+                currentHoverText = "🗑️ [Click / Q] Trash Can (Discard Item)";
+                return;
+            }
+
             PlateStation plate = hit.collider.GetComponentInParent<PlateStation>();
             if (plate != null)
             {
-                if (plate.finalDish != "")
+                if (plate.finalDish == "BurntMess")
                 {
-                    currentHoverText = $"🍽️ [Click / E] Pick up {plate.finalDish}";
+                    currentHoverText = "🤢 [Click / E] Pick up Burnt Mess (Throw in Trash)";
+                }
+                else if (plate.finalDish != "")
+                {
+                    currentHoverText = $"✨ [Click / E] Pick up {plate.finalDish}";
                 }
                 else
                 {
-                    currentHoverText = "🍽️ [Click / E] Assemble Plate";
+                    currentHoverText = "🍽️ [Click / E] Plate Station (Mix Ingredients)";
                 }
                 return;
             }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class PlateStation : MonoBehaviour
 {
@@ -29,7 +30,7 @@ public class PlateStation : MonoBehaviour
         if (item1 == "") 
         {
             item1 = food;
-            player.ClearHand(); // สั่งเคลียร์ของออกจากมือผู้เล่น
+            player.ClearHand();
             model1 = SpawnModel(item1, item1Slot != null ? item1Slot : transform);
             Debug.Log("วาง " + food + " ลงจานแล้ว (ชิ้นที่ 1)");
         }
@@ -46,17 +47,46 @@ public class PlateStation : MonoBehaviour
 
     void CheckRecipe()
     {
-        // เช็คสูตรอาหาร
+        // 1. เช็คสูตรอาหารที่ถูกต้อง
         if (HasItems("CookedRice", "CookedPork")) finalDish = "Katsudon";
         else if (HasItems("CookedPork", "ChoppedVeggie")) finalDish = "KoreanPork";
         else if (HasItems("CookedRice", "StewedBeef")) finalDish = "BeefCurry";
         else if (HasItems("GrilledBeef", "ChoppedVeggie")) finalDish = "Steak";
         else 
         {
-            Debug.Log("ผสมผิดสูตร! จานระเบิด ของหายหมด!");
-            ClearAllModels();
-            item1 = ""; 
-            item2 = ""; 
+            // 2. ผสมผิดสูตร! กลายเป็นอาหารไหม้ / Burnt Mess
+            finalDish = "BurntMess";
+            Debug.Log("💥 ผสมผิดสูตร! กลายเป็นอาหารไหม้ (Burnt Mess) — นำไปทิ้งถังขยะหรือทิ้งด้วยปุ่ม [Q]");
+
+            if (model1 != null) Destroy(model1);
+            if (model2 != null) Destroy(model2);
+
+            finalModel = SpawnModel("BurntMess", finalDishSlot != null ? finalDishSlot : transform);
+            if (finalModel == null && all3DModels != null && all3DModels.Length > 0)
+            {
+                // เสกโมเดลสีดำไหม้เพื่อแสดงผลว่าเป็นของเสีย
+                GameObject template = all3DModels[all3DModels.Length - 1] ?? all3DModels[0];
+                if (template != null)
+                {
+                    Transform slot = finalDishSlot != null ? finalDishSlot : transform;
+                    finalModel = Instantiate(template, slot.position, slot.rotation);
+                    finalModel.transform.SetParent(slot);
+
+                    Renderer[] renderers = finalModel.GetComponentsInChildren<Renderer>();
+                    foreach (var r in renderers)
+                    {
+                        if (r != null && r.material != null)
+                        {
+                            r.material.color = new Color(0.18f, 0.12f, 0.12f);
+                        }
+                    }
+
+                    Collider col = finalModel.GetComponent<Collider>();
+                    if (col != null) col.enabled = false;
+                }
+            }
+
+            StartCoroutine(MessedUpPuffEffect());
             return;
         }
 
@@ -64,13 +94,24 @@ public class PlateStation : MonoBehaviour
         {
             Debug.Log("✨ ประกอบร่างเสร็จ! กลายเป็น: " + finalDish);
             
-            // ลบโมเดลของดิบ/ของสุกทั้ง 2 ชิ้นทิ้ง
             if (model1 != null) Destroy(model1);
             if (model2 != null) Destroy(model2);
 
-            // เสกโมเดลอาหารสำเร็จรูปขึ้นมาตรงกลาง
             finalModel = SpawnModel(finalDish, finalDishSlot != null ? finalDishSlot : transform);
         }
+    }
+
+    IEnumerator MessedUpPuffEffect()
+    {
+        Transform target = finalDishSlot != null ? finalDishSlot : transform;
+        Vector3 originalScale = target.localScale;
+        
+        // Comical squish bounce
+        target.localScale = originalScale * 1.35f;
+        yield return new WaitForSeconds(0.12f);
+        target.localScale = originalScale * 0.85f;
+        yield return new WaitForSeconds(0.1f);
+        target.localScale = originalScale;
     }
 
     bool HasItems(string a, string b)
@@ -78,17 +119,17 @@ public class PlateStation : MonoBehaviour
         return (item1 == a && item2 == b) || (item1 == b && item2 == a);
     }
 
-    // ฟังก์ชันช่วยเสกโมเดล 3D ลงตำแหน่ง Slot
     GameObject SpawnModel(string itemName, Transform targetSlot)
     {
+        if (all3DModelNames == null || all3DModels == null) return null;
+
         for (int i = 0; i < all3DModelNames.Length; i++)
         {
-            if (all3DModelNames[i] == itemName && all3DModels[i] != null)
+            if (all3DModelNames[i] == itemName && i < all3DModels.Length && all3DModels[i] != null)
             {
                 GameObject newModel = Instantiate(all3DModels[i], targetSlot.position, targetSlot.rotation);
                 newModel.transform.SetParent(targetSlot);
                 
-                // ปิดฟิสิกส์กันโมเดลกระเด็นตกโต๊ะ
                 Collider col = newModel.GetComponent<Collider>();
                 if (col != null) col.enabled = false;
 
@@ -101,7 +142,6 @@ public class PlateStation : MonoBehaviour
         return null;
     }
 
-    // ฟังก์ชันให้ผู้เล่นหยิบอาหารที่เสร็จแล้วไปเสิร์ฟ
     public void TakeFinalDish(PlayerInteraction player)
     {
         if (finalDish != "")
@@ -109,7 +149,6 @@ public class PlateStation : MonoBehaviour
             Sprite dishImage = player.GetFoodSprite(finalDish);
             player.PickUpCookedFood(finalDish, dishImage);
             
-            // ล้างโมเดลบนโต๊ะออกให้หมด
             ClearAllModels();
             item1 = "";
             item2 = "";
@@ -117,7 +156,7 @@ public class PlateStation : MonoBehaviour
         }
     }
 
-    void ClearAllModels()
+    public void ClearAllModels()
     {
         if (model1 != null) Destroy(model1);
         if (model2 != null) Destroy(model2);
