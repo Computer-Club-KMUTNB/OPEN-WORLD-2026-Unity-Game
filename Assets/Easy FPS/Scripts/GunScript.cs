@@ -71,6 +71,9 @@ public class GunScript : MonoBehaviour {
 	[HideInInspector]
 	public bool reloading;
 
+	[HideInInspector]
+	public bool isAiming = false; // Toggle aiming state
+
 	private Vector3 gunPosVelocity;
 	private float cameraZoomVelocity;
 	private float secondCameraZoomVelocity;
@@ -87,6 +90,8 @@ public class GunScript : MonoBehaviour {
 		GiveCameraScriptMySensitvity();
 
 		PositionGun();
+
+		HandleAimToggle(); // Check for aim toggle input
 
 		Shooting();
 		MeeleAttack();
@@ -113,7 +118,7 @@ public class GunScript : MonoBehaviour {
 		 * Changing some values if we are aiming, like sensitity, zoom racion and position of the waepon.
 		 */
 		//if aiming
-		if(Input.GetAxis("Fire2") != 0 && !reloading && !meeleAttack){
+		if(isAiming && !reloading && !meeleAttack){
 			gunPrecision = gunPrecision_aiming;
 			recoilAmount_x = recoilAmount_x_;
 			recoilAmount_y = recoilAmount_y_;
@@ -183,7 +188,7 @@ public class GunScript : MonoBehaviour {
 	 * Also max speed is connected to the animator which will trigger the run animation.
 	 */
 	void Sprint(){// Running();  so i can find it with CTRL + F
-		if (Input.GetAxis ("Vertical") > 0 && Input.GetAxisRaw ("Fire2") == 0 && meeleAttack == false && Input.GetAxisRaw ("Fire1") == 0) {
+		if (Input.GetAxis ("Vertical") > 0 && !isAiming && meeleAttack == false && Input.GetAxisRaw ("Fire1") == 0) {
 			if (Input.GetKeyDown (KeyCode.LeftShift)) {
 				if (pmS.maxSpeed == walkingSpeed) {
 					pmS.maxSpeed = runningSpeed;//sets player movement peed to max
@@ -540,7 +545,7 @@ public class GunScript : MonoBehaviour {
 	 */
 	void DrawCrosshair(){
 		GUI.color = new Color(GUI.color.r, GUI.color.g, GUI.color.b, fadeout_value);
-		if(Input.GetAxis("Fire2") == 0){//if not aiming draw
+		if(!isAiming){//if not aiming draw
 			GUI.DrawTexture(new Rect(vec2(left_pos_crosshair).x + position_x(-expandValues_crosshair.x) + Screen.width/2,Screen.height/2 + vec2(left_pos_crosshair).y, vec2(size_crosshair_horizontal).x, vec2(size_crosshair_horizontal).y), vertical_crosshair);//left
 			GUI.DrawTexture(new Rect(vec2(right_pos_crosshair).x + position_x(expandValues_crosshair.x) + Screen.width/2,Screen.height/2 + vec2(right_pos_crosshair).y, vec2(size_crosshair_horizontal).x, vec2(size_crosshair_horizontal).y), vertical_crosshair);//right
 
@@ -583,7 +588,7 @@ public class GunScript : MonoBehaviour {
 			reloading = handsAnimator.GetCurrentAnimatorStateInfo(0).IsName(reloadAnimationName);
 
 			handsAnimator.SetFloat("walkSpeed",pmS.currentSpeed);
-			handsAnimator.SetBool("aiming", Input.GetButton("Fire2"));
+			handsAnimator.SetBool("aiming", isAiming);
 			handsAnimator.SetInteger("maxSpeed", pmS.maxSpeed);
 			if(Input.GetKeyDown(KeyCode.R) && pmS.maxSpeed < 5 && !reloading && !meeleAttack/* && !aiming*/){
 				StartCoroutine("Reload_Animation");
@@ -596,4 +601,18 @@ public class GunScript : MonoBehaviour {
 	public string reloadAnimationName = "Player_Reload";
 	public string aimingAnimationName = "Player_AImpose";
 	public string meeleAnimationName = "Character_Malee";
+
+	/*
+	 * Handle toggle aiming with right mouse button click
+	 */
+	void HandleAimToggle(){
+		if(Input.GetMouseButtonDown(1) && !reloading && !meeleAttack){
+			isAiming = !isAiming; // Toggle aiming state
+		}
+
+		// Cancel aiming if reloading or doing melee attack
+		if(reloading || meeleAttack){
+			isAiming = false;
+		}
+	}
 }

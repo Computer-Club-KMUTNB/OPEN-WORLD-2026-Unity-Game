@@ -2349,7 +2349,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a804723bdccf04fca985e160ab5f88d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentStyle: 1
+  currentStyle: 0
   mls: {fileID: 0}
   walkingSpeed: 3
   runningSpeed: 5
@@ -2361,6 +2361,7 @@ MonoBehaviour:
   aimPlacePosition: {x: 0, y: -0.03, z: 0.3}
   gunAimTime: 0.05
   reloading: 0
+  isAiming: 0
   mouseSensitvity_notAiming: 4
   mouseSensitvity_aiming: 1
   mouseSensitvity_running: 1
@@ -2371,7 +2372,7 @@ MonoBehaviour:
   forwardRotationAmount: {x: 1, y: 1}
   bulletSpawnPlace: {fileID: 0}
   bullet: {fileID: 128836, guid: c9e619a669d974fd28b5c89e43f2bce2, type: 3}
-  roundsPerSecond: 10
+  roundsPerSecond: 100
   recoilAmount_z: 0.04
   recoilAmount_x: 0.04
   recoilAmount_y: 0.04
