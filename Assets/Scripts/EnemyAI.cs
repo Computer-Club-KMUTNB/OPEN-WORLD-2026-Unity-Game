@@ -171,17 +171,14 @@ public class EnemyAI : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("⚠️ meatDropPrefab ยังว่างใน EnemyAI กรุณากลับไปผูก Prefab Meat ลงใน Inspector");
-        }
-        else
-        {
-            // Spawn a Meat drop with MeatPickup
+            Debug.LogWarning("⚠️ meatDropPrefab ยังว่างใน EnemyAI กำลังสร้าง Dropped Item ชั่วคราว...");
+            // Spawn a Meat drop with ItemPickup
             GameObject meatObj = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             meatObj.name = "RawBeefDrop";
             meatObj.transform.position = transform.position + Vector3.up * 0.5f;
             meatObj.transform.localScale = new Vector3(0.6f, 0.2f, 0.6f);
-            MeatPickup mp = meatObj.AddComponent<MeatPickup>();
-            mp.meatKind = MeatPickup.MeatKind.RawBeef;
+            ItemPickup mp = meatObj.AddComponent<ItemPickup>();
+            mp.itemType = ItemPickup.ItemType.Meat;
             mp.amount = 1;
             Renderer mr = meatObj.GetComponent<Renderer>();
             if (mr != null) mr.material.color = new Color(0.85f, 0.2f, 0.2f);
