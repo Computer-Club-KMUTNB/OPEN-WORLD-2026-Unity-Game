@@ -51,6 +51,13 @@ public class GameManager : MonoBehaviour
         set => globalVeggie = Mathf.Max(0, value);
     }
 
+    [Header("Summary Stats")]
+    public int customersServedToday = 0;
+    public int dishesCookedToday = 0;
+    public int moneyEarnedToday = 0;
+    public int moneySpentToday = 0;
+    public int tipsEarnedToday = 0;
+
     void Awake()
     {
         SaveSystem.InitializeOnStartup();
@@ -104,12 +111,31 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // ฟังก์ชันเสิร์ฟอาหารและได้เงิน
+    // ฟังก์ชันเสิร์ฟอาหารและได้เงินแบบพื้นฐาน
     public void ServeFood()
     {
-        playerMoney += 50; 
-        UpdateMoneyText(); 
-        Debug.Log($"🍽️ Food served! Money: {playerMoney} Baht");
+        RecordFoodServed(50, 0);
+    }
+
+    // ฟังก์ชันเสิร์ฟอาหาร (รับค่าราคา และทิป)
+    public void RecordFoodServed(int price, int tip)
+    {
+        int totalReceived = price + tip;
+        playerMoney += totalReceived;
+        
+        // บันทึกลงสถิติประจำวัน
+        customersServedToday++;
+        moneyEarnedToday += price;
+        tipsEarnedToday += tip;
+
+        UpdateMoneyText();
+        Debug.Log($"🍽️ Food Served! Got money {price} + Tip {tip} Baht | Total Money: {playerMoney}");
+    }
+
+    // ฟังก์ชันบันทึกการทำอาหารเสร็จ
+    public void RecordDishCooked()
+    {
+        dishesCookedToday++;
     }
 
     public void UpdateMoneyText()
@@ -126,10 +152,11 @@ public class GameManager : MonoBehaviour
         if (playerMoney >= amount)
         {
             playerMoney -= amount;
+            moneySpentToday += amount;
             UpdateMoneyText();
             return true;
         }
-        return false; // เงินไม่พอ
+        return false;
     }
 
     // สำหรับรับเนื้อสัตว์จากการล่า
@@ -145,5 +172,22 @@ public class GameManager : MonoBehaviour
             rawPorkStock += amount;
             Debug.Log($"🥓 ได้รับเนื้อหมูจากการล่ามาเพิ่ม +{amount}! สต็อคปัจจุบัน: {rawPorkStock}");
         }
+        SaveSystem.Save();
+    }
+
+    // คำนวณกำไรประจำวัน
+    public int GetNetProfitToday()
+    {
+        return (moneyEarnedToday + tipsEarnedToday) - moneySpentToday;
+    }
+
+    // รีเซ็ตสถิติเพื่อเตรียมใช้ในวันถัดไป
+    public void ResetDailyStats()
+    {
+        customersServedToday = 0;
+        dishesCookedToday = 0;
+        moneyEarnedToday = 0;
+        moneySpentToday = 0;
+        tipsEarnedToday = 0;
     }
 }

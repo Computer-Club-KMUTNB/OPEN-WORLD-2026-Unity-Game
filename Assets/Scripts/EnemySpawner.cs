@@ -4,114 +4,135 @@ using TMPro;
 
 public class EnemySpawner : MonoBehaviour
 {
-    [Header("Enemy Settings")]
-    public GameObject enemyPrefab;
+    [Header("Enemy Prefabs")]
+    [Tooltip("ใส่ Prefab มอนสเตอร์ทั้ง 2 ชนิด")]
+    public GameObject[] enemyPrefabs;
+
+    [Header("Spawn Points")]
+    [Tooltip("ลากจุดเกิดทั้งหมดมาใส่ (ระบบจะวนลูปใช้จุดเกิดอัตโนมัติ)")]
     public Transform[] spawnPoints;
 
-    [Header("Wave Settings")]
-    public int totalEnemiesThisWave = 5;
-    public float spawnInterval = 2.0f;
-    public int maxAliveEnemies = 3;
+    [Header("Wave Settings (3 Waves)")]
+    [Tooltip("จำนวนมอนสเตอร์ใน Wave 1")]
+    public int wave1EnemyCount = 1;
+    [Tooltip("จำนวนมอนสเตอร์ใน Wave 2")]
+    public int wave2EnemyCount = 3;
+    [Tooltip("จำนวนมอนสเตอร์ใน Wave 3 (Final Wave)")]
+    public int wave3EnemyCount = 5;
+
+    [Header("Timing Settings")]
+    [Tooltip("ระยะห่างเวลาการเกิดของแต่ละตัวในเวฟเดียวกัน (วินาที)")]
+    public float spawnInterval = 0.5f;
+    [Tooltip("ระยะเวลาพักก่อนเริ่มเวฟถัดไป (วินาที)")]
+    public float timeBetweenWaves = 1.0f;
 
     [Header("UI & Door References")]
-    [Tooltip("ลาก TextMeshPro แสดงจำนวนศัตรูมาใส่")]
-    public TextMeshProUGUI enemiesRemainingText;
-    [Tooltip("ลาก ประตูทางออก ที่ต้องการให้เปิดเมื่อเคลียร์จบมาใส่")]
+    public TMP_Text enemiesRemainingText;
     public DoorController exitDoor;
 
-    private int spawnedCount = 0;
-    private int currentAliveCount = 0;
-    private int enemiesKilled = 0;
-    private bool isSpawning = false;
+    private int totalEnemiesRemaining;
+    private int currentWaveAlive = 0;
+    private bool isWaveStarted = false;
 
-    // ลบการ StartWave ออกจาก Start() เพื่อรอให้ Trigger เป็นตัวสั่งเริ่ม
     void Start()
     {
-        if (enemiesRemainingText != null)
-        {
-            enemiesRemainingText.gameObject.SetActive(false); // ซ่อน UI ไว้ก่อนจนกว่าจะเริ่มเวฟ
-        }
+        // คำนวณยอดรวมศัตรูทั้งหมดทั้ง 3 เวฟอัตโนมัติ
+        totalEnemiesRemaining = wave1EnemyCount + wave2EnemyCount + wave3EnemyCount;
+        UpdateUI();
     }
 
     public void StartWave()
     {
-        spawnedCount = 0;
-        currentAliveCount = 0;
-        enemiesKilled = 0;
-        isSpawning = true;
+        if (isWaveStarted) return;
+        isWaveStarted = true;
 
-        if (enemiesRemainingText != null)
-        {
-            enemiesRemainingText.gameObject.SetActive(true);
-            UpdateRemainingUI();
-        }
-
-        StartCoroutine(SpawnRoutine());
+        totalEnemiesRemaining = wave1EnemyCount + wave2EnemyCount + wave3EnemyCount;
+        UpdateUI();
+        StartCoroutine(ExecuteWaveSequence());
     }
 
-    IEnumerator SpawnRoutine()
+    IEnumerator ExecuteWaveSequence()
     {
-        while (spawnedCount < totalEnemiesThisWave)
+        // --- Wave 1 ---
+        yield return StartCoroutine(RunWave(wave1EnemyCount));
+        yield return new WaitForSeconds(timeBetweenWaves);
+
+        // --- Wave 2 ---
+        yield return StartCoroutine(RunWave(wave2EnemyCount));
+        yield return new WaitForSeconds(timeBetweenWaves);
+
+        // --- Wave 3 ---
+        yield return StartCoroutine(RunWave(wave3EnemyCount));
+
+        // เคลียร์ครบทั้ง 3 เวฟ
+        RoomCleared();
+    }
+
+    IEnumerator RunWave(int enemyCount)
+    {
+        if (enemyCount <= 0) yield break;
+
+        currentWaveAlive = enemyCount;
+
+        for (int i = 0; i < enemyCount; i++)
         {
-            if (currentAliveCount < maxAliveEnemies && spawnPoints.Length > 0)
+            // สลับวนลูปจุดเกิดตามจำนวน spawnPoints ที่มี (เช่น มี 3 จุด ตัวที่ 4 จะวนกลับมาเกิดจุดที่ 1)
+            int spawnIndex = i % spawnPoints.Length;
+            SpawnEnemyAtPoint(spawnIndex);
+
+            // หากยังมีตัวถัดไปในเวฟ ให้เว้นระยะเวลาเล็กน้อย
+            if (i < enemyCount - 1 && spawnInterval > 0f)
             {
-                SpawnSingleEnemy();
                 yield return new WaitForSeconds(spawnInterval);
             }
-            else
-            {
-                yield return new WaitForSeconds(0.5f);
-            }
         }
-        isSpawning = false;
+
+        // รอจนกว่ามอนสเตอร์ทั้งหมดในเวฟนี้จะถูกกำจัด
+        yield return new WaitUntil(() => currentWaveAlive <= 0);
     }
 
-    void SpawnSingleEnemy()
+    void SpawnEnemyAtPoint(int spawnIndex)
     {
-        Transform randomPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
-        GameObject newEnemy = Instantiate(enemyPrefab, randomPoint.position, randomPoint.rotation);
+        if (enemyPrefabs == null || enemyPrefabs.Length == 0) return;
+        if (spawnPoints == null || spawnPoints.Length == 0) return;
 
-        EnemyAI enemyAI = newEnemy.GetComponent<EnemyAI>();
-        if (enemyAI != null)
+        // สุ่มเลือกระหว่าง Minotaur หรือ Monster2
+        GameObject selectedPrefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
+        Transform targetPoint = spawnPoints[spawnIndex];
+
+        GameObject enemyObj = Instantiate(selectedPrefab, targetPoint.position, targetPoint.rotation);
+
+        EnemyAI ai = enemyObj.GetComponent<EnemyAI>();
+        if (ai != null)
         {
-            enemyAI.SetSpawner(this);
+            ai.SetSpawner(this);
         }
-
-        spawnedCount++;
-        currentAliveCount++;
     }
 
     public void OnEnemyKilled()
     {
-        currentAliveCount--;
-        enemiesKilled++;
-        UpdateRemainingUI();
-
-        if (!isSpawning && currentAliveCount <= 0)
-        {
-            OnWaveCleared();
-        }
+        currentWaveAlive--;
+        totalEnemiesRemaining--;
+        UpdateUI();
     }
 
-    void UpdateRemainingUI()
+    void UpdateUI()
     {
         if (enemiesRemainingText != null)
         {
-            int remaining = totalEnemiesThisWave - enemiesKilled;
-            enemiesRemainingText.text = $"Enemies Left: {remaining}";
+            enemiesRemainingText.text = $"Enemies Left: {totalEnemiesRemaining}";
         }
     }
 
-    void OnWaveCleared()
+    void RoomCleared()
     {
-        Debug.Log("🎉 เคลียร์ห้องสำเร็จ!");
-        
+        Debug.Log("🎉 เคลียร์ทั้ง 3 Wave สำเร็จ!");
+
         if (enemiesRemainingText != null)
         {
-            enemiesRemainingText.text = "ROOM CLEARED!";
+            enemiesRemainingText.text = "Room Cleared!";
         }
 
-        // สั่งเปิดประตูทางออก
         if (exitDoor != null)
         {
             exitDoor.OpenDoor();

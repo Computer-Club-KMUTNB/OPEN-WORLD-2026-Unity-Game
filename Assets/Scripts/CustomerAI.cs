@@ -12,21 +12,30 @@ public class CustomerAI : MonoBehaviour
     public GameObject orderCanvas;
     public Image orderIconImage;
     public Sprite[] foodMenuSprites;
-    public string[] foodMenuNames; // เก็บชื่อของเมนูให้ตรงกับรูปภาพ
-    private string currentOrderName = ""; // ลูกค้าสั่งเมนูชื่ออะไร
+    public string[] foodMenuNames; 
+    private string currentOrderName = ""; 
 
+    [Header("ระบบความอดทนและทิป")]
+    public Image patienceBar;           // หลอดความอดทน
+    public float maxPatienceTime = 30f; // เวลารอสูงสุด
+    public float fastServeTime = 10f;   // ถ้าเสิร์ฟทันในเวลานี้ จะได้ทิป
+    public int basePrice = 50;          // ราคาอาหารปกติ
+    public int tipAmount = 15;          // จำนวนเงินทิป
+
+    private float currentTimer;
     private bool hasOrdered = false;
     private bool hasBeenServed = false;
-    private bool isLeaving = false; // เอาไว้เช็คว่ากำลังเดินออกจากร้าน
+    private bool isLeaving = false; 
 
-    private Seat mySeat; // ลูกค้านั่งเก้าอี้ตัวไหนอยู่
-    private Transform exitPoint; // ทางออก
+    private Seat mySeat; 
+    private Transform exitPoint; 
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        currentTimer = maxPatienceTime; // เซ็ตเวลาเริ่มต้น
         
-        // ะบบค้นหาจุดทางออก
+        // ระบบค้นหาจุดทางออก
         GameObject exit = GameObject.Find("ExitPoint");
         if (exit != null)
         {
@@ -38,7 +47,7 @@ public class CustomerAI : MonoBehaviour
 
     void Update()
     {
-        // 1. เช็คตอนเดินมาถึงโต๊ะ สั่งอาหาร
+        // เช็คตอนเดินมาถึงโต๊ะ สั่งอาหาร
         if (!hasOrdered && !isLeaving && agent.hasPath)
         {
             if (agent.remainingDistance < 0.5f)
@@ -51,13 +60,41 @@ public class CustomerAI : MonoBehaviour
             }
         }
 
-        // 2. เดินออกจากร้าน
+        // ระบบนับเวลารออาหาร
+        if (hasOrdered && !hasBeenServed && !isLeaving)
+        {
+            currentTimer -= Time.deltaTime; // นับเวลาถอยหลัง
+
+            // อัปเดตหลอดความอดทน
+            if (patienceBar != null)
+            {
+                patienceBar.fillAmount = currentTimer / maxPatienceTime;
+                
+                float timeTaken = maxPatienceTime - currentTimer;
+
+                // เปลี่ยนสีหลอดตามเวลาที่เหลือ
+                if (timeTaken <= fastServeTime)
+                    patienceBar.color = Color.green; // ได้ทิป
+                else if (currentTimer > 10f)
+                    patienceBar.color = Color.yellow; // ปกติ
+                else
+                    patienceBar.color = Color.red;    // ใกล้หมดเวลา
+            }
+
+            // หมดความอดทน
+            if (currentTimer <= 0)
+            {
+                LeaveAngry();
+            }
+        }
+
+        // เดินออกจากร้าน
         if (isLeaving && agent.hasPath)
         {
             if (agent.remainingDistance < 0.5f)
             {
                 Debug.Log("ลูกค้าออกจากร้านแล้ว!");
-                Destroy(gameObject); // ลบตัวลูกค้าทิ้ง
+                Destroy(gameObject); 
             }
         }
     }
@@ -68,8 +105,6 @@ public class CustomerAI : MonoBehaviour
         {
             int randomIndex = Random.Range(0, foodMenuSprites.Length);
             orderIconImage.sprite = foodMenuSprites[randomIndex];
-            
-            // ลูกค้าจำชื่อเมนูจากลำดับเดียวกันกับรูปภาพ
             currentOrderName = foodMenuNames[randomIndex]; 
 
             if (orderCanvas != null) orderCanvas.SetActive(true);
@@ -95,7 +130,6 @@ public class CustomerAI : MonoBehaviour
         {
             int randomIndex = Random.Range(0, emptySeats.Count);
             
-            // จำเก้าอี้ที่ตัวเองเลือกไว้และเปลี่ยนสถานะเป็น "มีคนนั่ง"
             mySeat = emptySeats[randomIndex]; 
             mySeat.isOccupied = true;
             
@@ -105,16 +139,23 @@ public class CustomerAI : MonoBehaviour
 
     public bool ReceiveFood(string foodInPlayerHand) 
     {
-        if (hasOrdered && !hasBeenServed)
+        if (hasOrdered && !hasBeenServed && !isLeaving)
         {
-            // เช็คว่าของในมือผู้เล่นตรงกับเมนูที่สั่ง
             if (foodInPlayerHand == currentOrderName) 
             {
                 hasBeenServed = true;
                 if (orderCanvas != null) orderCanvas.SetActive(false);
 
-                GameManager gm = FindAnyObjectByType<GameManager>();
-                if (gm != null) gm.ServeFood();
+                // คำนวณทิป
+                float timeTaken = maxPatienceTime - currentTimer;
+                int calculatedTip = (timeTaken <= fastServeTime) ? tipAmount : 0;
+
+                if (calculatedTip > 0) Debug.Log($"ได้ทิป {calculatedTip} บาท");
+                else Debug.Log("ได้ค่าอาหารปกติ");
+
+                // ส่งข้อมูลราคาและทิปไปให้ GameManager บันทึก
+                GameManager gm = GameManager.Instance;
+                if (gm != null) gm.RecordFoodServed(basePrice, calculatedTip);
 
                 if (RestaurantFlowController.Instance != null)
                 {
@@ -134,21 +175,14 @@ public class CustomerAI : MonoBehaviour
         return false;
     }
 
-    // ฟังก์ชันรอเวลากินอาหาร
     IEnumerator EatAndLeave()
     {
         Debug.Log(gameObject.name + " กำลังกินอาหาร...");
         
-        // รอเวลาลูกค้ากินอาหาร 3 วินาที
         yield return new WaitForSeconds(3f);
 
-        // คืนสถานะเก้าอี้ให้ว่าง
-        if (mySeat != null)
-        {
-            mySeat.isOccupied = false;
-        }
+        if (mySeat != null) mySeat.isOccupied = false;
 
-        // ดินไปที่ประตูทางออก
         isLeaving = true;
         if (exitPoint != null)
         {
@@ -157,7 +191,27 @@ public class CustomerAI : MonoBehaviour
         }
         else
         {
-            Destroy(gameObject); // ถ้าหาทางออกไม่เจอ ก็ลบตัวเองทิ้งไปเลย
+            Destroy(gameObject); 
+        }
+    }
+
+    // ลูกค้าเดินหนี
+    void LeaveAngry()
+    {
+        isLeaving = true;
+        Debug.Log(gameObject.name + " รอนานเกินไป เดินออกจากร้านแล้ว");
+
+        if (orderCanvas != null) orderCanvas.SetActive(false);
+        
+        if (mySeat != null) mySeat.isOccupied = false;
+
+        if (exitPoint != null)
+        {
+            agent.SetDestination(exitPoint.position);
+        }
+        else
+        {
+            Destroy(gameObject);
         }
     }
 }
