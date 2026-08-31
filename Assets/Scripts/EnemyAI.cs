@@ -159,9 +159,19 @@ public class EnemyAI : MonoBehaviour
             anim.SetTrigger("Die");
         }
 
+        if (meatDropPrefab == null)
+        {
+            meatDropPrefab = GameObject.Find("MeatDrop") ?? GameObject.Find("MeatPickup") ?? Resources.Load<GameObject>("MeatDrop");
+        }
+
         if (meatDropPrefab != null)
         {
             Instantiate(meatDropPrefab, transform.position + Vector3.up * 0.5f, Quaternion.identity);
+            Debug.Log($"🥩 Spawn Meat Drop at {transform.position}");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ meatDropPrefab ยังว่างใน EnemyAI กรุณากลับไปผูก Prefab Meat ลงใน Inspector");
         }
         else
         {
