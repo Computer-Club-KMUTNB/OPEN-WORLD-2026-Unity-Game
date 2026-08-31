@@ -222,6 +222,10 @@ public class DungeonFlowController : MonoBehaviour
 
     private void OnGUI()
     {
+        if (Time.timeScale <= 0f) return;
+        Scene pauseHunt = SceneManager.GetSceneByName(pauseSceneName);
+        if (pauseHunt.isLoaded) return;
+
         if (isNearDoor && !isExtracting)
         {
             GUIStyle style = new GUIStyle(GUI.skin.box);

@@ -1,10 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-#if ENABLE_INPUT_SYSTEM
-using UnityEngine.InputSystem;
-#endif
-
 public class PauseMenuController : MonoBehaviour
 {
     [Header("Main Panels")]
@@ -17,8 +13,6 @@ public class PauseMenuController : MonoBehaviour
 
     [Header("State")]
     public bool isPaused = false;
-    private CursorLockMode previousCursorLockMode;
-    private bool previousCursorVisible;
 
     private void Awake()
     {
@@ -64,23 +58,7 @@ public class PauseMenuController : MonoBehaviour
 
     private void Update()
     {
-        bool escapePressed = false;
-
-#if ENABLE_INPUT_SYSTEM
-        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
-        {
-            escapePressed = true;
-        }
-#endif
-
-#if ENABLE_LEGACY_INPUT_MANAGER
         if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.P))
-        {
-            escapePressed = true;
-        }
-#endif
-
-        if (escapePressed)
         {
             TogglePause();
         }
@@ -102,9 +80,6 @@ public class PauseMenuController : MonoBehaviour
     {
         isPaused = true;
         Time.timeScale = 0f;
-
-        previousCursorLockMode = Cursor.lockState;
-        previousCursorVisible = Cursor.visible;
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -132,6 +107,18 @@ public class PauseMenuController : MonoBehaviour
         }
     }
 
+    private void OnDisable()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
+    private void OnDestroy()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
     public void OpenSettings()
     {
         if (mainPausePanel != null) mainPausePanel.SetActive(false);
@@ -147,12 +134,16 @@ public class PauseMenuController : MonoBehaviour
     public void RestartCurrentScene()
     {
         Time.timeScale = 1f;
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     public void ReturnToMainMenu()
     {
         Time.timeScale = 1f;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         SceneManager.LoadScene(mainMenuSceneName);
     }
 

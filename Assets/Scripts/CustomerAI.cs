@@ -15,12 +15,12 @@ public class CustomerAI : MonoBehaviour
     public string[] foodMenuNames; 
     private string currentOrderName = ""; 
 
-    [Header("ระบบความอดทนและทิป (ใหม่!)")]
+    [Header("ระบบความอดทนและทิป")]
     public Image patienceBar;           // หลอดความอดทน (UI Image แบบ Filled)
-    public float maxPatienceTime = 30f; // เวลารอสูงสุด
-    public float fastServeTime = 10f;   // ถ้าเสิร์ฟทันในเวลานี้ จะได้ทิป
+    public float maxPatienceTime = 75f; // เวลารอสูงสุด (เพิ่มเวลาให้เสิร์ฟสบายขึ้น)
+    public float fastServeTime = 25f;   // ถ้าเสิร์ฟทันในเวลานี้ จะได้ทิปพิเศษ
     public int basePrice = 50;          // ราคาอาหารปกติ
-    public int tipAmount = 15;          // จำนวนเงินทิป
+    public int tipAmount = 20;          // จำนวนเงินทิป
 
     private float currentTimer;
     private bool hasOrdered = false;
@@ -52,15 +52,18 @@ public class CustomerAI : MonoBehaviour
         {
             if (agent.remainingDistance < 0.5f)
             {
-                transform.position = mySeat.transform.position; 
-                transform.rotation = mySeat.transform.rotation; 
+                if (mySeat != null)
+                {
+                    transform.position = mySeat.transform.position; 
+                    transform.rotation = mySeat.transform.rotation; 
+                }
 
                 hasOrdered = true;
                 OrderRandomFood();
             }
         }
 
-        // 2. ระบบนับเวลารออาหาร (ใหม่!)
+        // 2. ระบบนับเวลารออาหาร
         if (hasOrdered && !hasBeenServed && !isLeaving)
         {
             currentTimer -= Time.deltaTime; // นับเวลาถอยหลัง
@@ -74,14 +77,14 @@ public class CustomerAI : MonoBehaviour
 
                 // เปลี่ยนสีหลอดตามเวลาที่เหลือ
                 if (timeTaken <= fastServeTime)
-                    patienceBar.color = Color.green; // โซนได้ทิป
-                else if (currentTimer > 10f)
-                    patienceBar.color = Color.yellow; // โซนปกติ
+                    patienceBar.color = new Color(0.3f, 0.9f, 0.4f); // โซนได้ทิป (เขียวสด)
+                else if (currentTimer > 20f)
+                    patienceBar.color = new Color(1.0f, 0.85f, 0.25f); // โซนปกติ (เหลือง)
                 else
-                    patienceBar.color = Color.red;    // โซนใกล้หมดเวลา (ใกล้โกรธ)
+                    patienceBar.color = new Color(1.0f, 0.35f, 0.35f);    // โซนใกล้หมดเวลา (แดง)
             }
 
-            // ถ้าหมดความอดทน!
+            // ถ้าหมดความอดทน
             if (currentTimer <= 0)
             {
                 LeaveAngry();
@@ -101,11 +104,14 @@ public class CustomerAI : MonoBehaviour
 
     void OrderRandomFood()
     {
-        if (foodMenuSprites.Length > 0 && orderIconImage != null)
+        if (foodMenuSprites != null && foodMenuSprites.Length > 0 && orderIconImage != null)
         {
             int randomIndex = Random.Range(0, foodMenuSprites.Length);
             orderIconImage.sprite = foodMenuSprites[randomIndex];
-            currentOrderName = foodMenuNames[randomIndex]; 
+            if (foodMenuNames != null && randomIndex < foodMenuNames.Length)
+            {
+                currentOrderName = foodMenuNames[randomIndex];
+            }
 
             if (orderCanvas != null) orderCanvas.SetActive(true);
         }
@@ -113,23 +119,25 @@ public class CustomerAI : MonoBehaviour
 
     void FindRandomEmptySeat()
     {
-        if (agent.isOnNavMesh == false) return;
+        if (agent == null || agent.isOnNavMesh == false) return;
 
         Seat[] allSeats = FindObjectsByType<Seat>(FindObjectsSortMode.None); 
         List<Seat> emptySeats = new List<Seat>();
 
-        foreach (Seat seat in allSeats)
+        if (allSeats != null)
         {
-            if (seat.isOccupied == false)
+            foreach (Seat seat in allSeats)
             {
-                emptySeats.Add(seat);
+                if (seat != null && seat.isOccupied == false)
+                {
+                    emptySeats.Add(seat);
+                }
             }
         }
 
         if (emptySeats.Count > 0)
         {
             int randomIndex = Random.Range(0, emptySeats.Count);
-            
             mySeat = emptySeats[randomIndex]; 
             mySeat.isOccupied = true;
             
@@ -146,14 +154,13 @@ public class CustomerAI : MonoBehaviour
                 hasBeenServed = true;
                 if (orderCanvas != null) orderCanvas.SetActive(false);
 
-                // --- คำนวณทิป (ใหม่!) ---
+                // คำนวณทิป
                 float timeTaken = maxPatienceTime - currentTimer;
                 int calculatedTip = (timeTaken <= fastServeTime) ? tipAmount : 0;
 
                 if (calculatedTip > 0) Debug.Log($"⚡ เสิร์ฟไวมาก! ได้ทิป {calculatedTip} บาท");
                 else Debug.Log("👍 เสิร์ฟทันเวลา ได้ค่าอาหารปกติ");
 
-                // ส่งข้อมูลราคาและทิปไปให้ GameManager บันทึก
                 GameManager gm = GameManager.Instance;
                 if (gm != null) gm.RecordFoodServed(basePrice, calculatedTip);
 
@@ -163,12 +170,11 @@ public class CustomerAI : MonoBehaviour
                 }
 
                 StartCoroutine(EatAndLeave());
-
                 return true;
             }
             else
             {
-                Debug.Log("เสิร์ฟผิดเมนู! ฉันสั่ง " + currentOrderName + " แต่คุณเอา " + foodInPlayerHand + " มาให้");
+                Debug.Log($"เสิร์ฟผิดเมนู! สั่ง: {currentOrderName} แต่ได้: {foodInPlayerHand}");
                 return false;
             }
         }
@@ -177,17 +183,14 @@ public class CustomerAI : MonoBehaviour
 
     IEnumerator EatAndLeave()
     {
-        Debug.Log(gameObject.name + " กำลังกินอาหาร...");
-        
         yield return new WaitForSeconds(3f);
 
         if (mySeat != null) mySeat.isOccupied = false;
 
         isLeaving = true;
-        if (exitPoint != null)
+        if (exitPoint != null && agent != null && agent.isOnNavMesh)
         {
             agent.SetDestination(exitPoint.position);
-            Debug.Log(gameObject.name + " กินเสร็จแล้ว กำลังเดินออกจากร้าน!");
         }
         else
         {
@@ -195,18 +198,15 @@ public class CustomerAI : MonoBehaviour
         }
     }
 
-    // ฟังก์ชันใหม่: ลูกค้าโกรธเดินหนี
     void LeaveAngry()
     {
         isLeaving = true;
-        Debug.Log(gameObject.name + " รอนานเกินไป โมโหเดินออกจากร้านแล้ว!");
+        Debug.Log("ลูกค้าหมดความอดทนเดินออกจากร้าน!");
 
-        if (orderCanvas != null) orderCanvas.SetActive(false); // ซ่อนป้ายออเดอร์
-        
-        // สำคัญมาก: ต้องคืนเก้าอี้ให้ว่าง ลูกค้าคนต่อไปจะได้มานั่งโต๊ะนี้ได้!
+        if (orderCanvas != null) orderCanvas.SetActive(false);
         if (mySeat != null) mySeat.isOccupied = false;
 
-        if (exitPoint != null)
+        if (exitPoint != null && agent != null && agent.isOnNavMesh)
         {
             agent.SetDestination(exitPoint.position);
         }

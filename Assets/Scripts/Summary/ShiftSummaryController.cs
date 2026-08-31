@@ -32,7 +32,7 @@ public class ShiftSummaryController : MonoBehaviour
     [SerializeField] private Button mainMenuButton;
 
     [Header("Scene Navigation")]
-    [SerializeField] private string restaurantSceneName = "restaurant-scene";
+    [SerializeField] private string restaurantSceneName = "Dev_Restaurant_Flow";
     [SerializeField] private string mainMenuSceneName = "MainMenu";
 
     private void Awake()
@@ -119,7 +119,7 @@ public class ShiftSummaryController : MonoBehaviour
         yield return new WaitForSecondsRealtime(0.15f);
 
         // 4. Pop Rating Stars sequentially
-        int fullStars = Mathf.FloorToInt(bridge.starRating);
+        int fullStars = Mathf.RoundToInt(bridge.starRating);
         for (int i = 0; i < ratingStarImages.Count; i++)
         {
             if (ratingStarImages[i] != null)
@@ -135,7 +135,14 @@ public class ShiftSummaryController : MonoBehaviour
 
         if (ratingLabelText != null)
         {
-            ratingLabelText.text = $"{bridge.starRating:F1} (Flawless Service)";
+            string rankTitle;
+            if (bridge.starRating >= 4.75f) rankTitle = "⭐ Legendary 5-Star Chef!";
+            else if (bridge.starRating >= 3.8f) rankTitle = "⭐ Great Cooking & Service!";
+            else if (bridge.starRating >= 2.8f) rankTitle = "⭐ Good Shift!";
+            else if (bridge.starRating >= 1.8f) rankTitle = "⭐ Needs More Practice";
+            else rankTitle = "⭐ Tough Day at Shop";
+
+            ratingLabelText.text = $"{bridge.starRating:F1} ({rankTitle})";
             yield return StartCoroutine(SuspenseStatRoller.BounceSlam(ratingLabelText.transform, Vector3.one, 1.15f, 0.18f));
         }
 
