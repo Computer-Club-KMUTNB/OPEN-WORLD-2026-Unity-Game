@@ -35,7 +35,6 @@ public class ExpeditionSummaryController : MonoBehaviour
 
     private void Awake()
     {
-        // Start completely blank so nothing shows instantly before animation
         if (rankBadgeText != null) rankBadgeText.text = "";
         if (rankSubtitleText != null) rankSubtitleText.text = "";
         if (beastsSlainText != null) beastsSlainText.text = "";
@@ -58,7 +57,23 @@ public class ExpeditionSummaryController : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
+        SetupButtonListeners();
         StartCoroutine(PlaySummarySequence());
+    }
+
+    private void SetupButtonListeners()
+    {
+        if (backToRestaurantButton != null)
+        {
+            backToRestaurantButton.onClick.RemoveAllListeners();
+            backToRestaurantButton.onClick.AddListener(OnBackToRestaurantClicked);
+        }
+
+        if (mainMenuButton != null)
+        {
+            mainMenuButton.onClick.RemoveAllListeners();
+            mainMenuButton.onClick.AddListener(OnReturnToMainMenuClicked);
+        }
     }
 
     private IEnumerator PlaySummarySequence()
@@ -72,7 +87,7 @@ public class ExpeditionSummaryController : MonoBehaviour
 
         yield return new WaitForSecondsRealtime(0.2f);
 
-        // 1. Roll Threat Rank with suspense (Blank -> Animation -> Reveal)
+        // 1. Threat Rank Roll
         string[] fakeRanks = new string[] { "D-RANK", "C-RANK", "B-RANK", "A-RANK", "SS-RANK", "S-RANK" };
         if (rankBadgeText != null)
         {
@@ -80,7 +95,7 @@ public class ExpeditionSummaryController : MonoBehaviour
                 rankBadgeText,
                 fakeRanks,
                 $"<b>{bridge.threatRank}</b>",
-                duration: 1.1f
+                duration: 1.0f
             ));
         }
 
@@ -90,17 +105,17 @@ public class ExpeditionSummaryController : MonoBehaviour
             yield return StartCoroutine(SuspenseStatRoller.BounceSlam(rankSubtitleText.transform, Vector3.one, 1.25f, 0.2f));
         }
 
-        yield return new WaitForSecondsRealtime(0.2f);
+        yield return new WaitForSecondsRealtime(0.15f);
 
-        // 2. Roll Beasts Slain (Blank -> Animation -> Reveal)
+        // 2. Beasts Slain Roll
         if (beastsSlainText != null)
         {
             yield return StartCoroutine(SuspenseStatRoller.RollNumberCoroutine(
                 beastsSlainText,
                 bridge.totalBeastsSlain,
-                prefix: "BEASTS SLAIN: ",
-                suffix: " KILLS",
-                duration: 0.8f,
+                prefix: "Beasts Slain: ",
+                suffix: " Kills",
+                duration: 0.75f,
                 maxRandomNumber: 25
             ));
         }
@@ -113,10 +128,10 @@ public class ExpeditionSummaryController : MonoBehaviour
 
         yield return new WaitForSecondsRealtime(0.15f);
 
-        // 3. Reveal Time & Damage (Blank -> Animation -> Reveal)
+        // 3. Time & Damage
         if (timeInWildText != null)
         {
-            timeInWildText.text = $"TIME: {bridge.timeInWild}";
+            timeInWildText.text = $"Time in Wild: {bridge.timeInWild}";
             yield return StartCoroutine(SuspenseStatRoller.BounceSlam(timeInWildText.transform, Vector3.one, 1.2f, 0.18f));
         }
 
@@ -125,16 +140,16 @@ public class ExpeditionSummaryController : MonoBehaviour
             yield return StartCoroutine(SuspenseStatRoller.RollNumberCoroutine(
                 damageDealtText,
                 bridge.totalDamageDealt,
-                prefix: "",
-                suffix: " DMG DEALT",
-                duration: 0.8f,
-                maxRandomNumber: 20000
+                prefix: "Damage Dealt: ",
+                suffix: " DMG",
+                duration: 0.75f,
+                maxRandomNumber: 15000
             ));
         }
 
-        yield return new WaitForSecondsRealtime(0.25f);
+        yield return new WaitForSecondsRealtime(0.2f);
 
-        // 4. Reveal Harvested Loot Cards sequentially (Blank -> Punch in one by one)
+        // 4. Harvested Loot Cards
         if (lootSectionPanel != null)
         {
             lootSectionPanel.SetActive(true);
@@ -146,6 +161,8 @@ public class ExpeditionSummaryController : MonoBehaviour
             if (i < bridge.harvestedLoot.Count && lootCardObjects[i] != null)
             {
                 var loot = bridge.harvestedLoot[i];
+                lootCardObjects[i].SetActive(true);
+
                 if (i < lootNameTexts.Count && lootNameTexts[i] != null) lootNameTexts[i].text = loot.itemName;
                 if (i < lootQtyTexts.Count && lootQtyTexts[i] != null) lootQtyTexts[i].text = "x0";
 
@@ -174,9 +191,9 @@ public class ExpeditionSummaryController : MonoBehaviour
             }
         }
 
-        yield return new WaitForSecondsRealtime(0.25f);
+        yield return new WaitForSecondsRealtime(0.2f);
 
-        // 5. Reveal Action Buttons
+        // 5. Action Buttons Panel
         if (actionButtonsPanel != null)
         {
             actionButtonsPanel.SetActive(true);

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 //using UnityStandardAssets.ImageEffects;
 
@@ -519,6 +519,9 @@ public class GunScript : MonoBehaviour {
 	[Tooltip("HUD bullets to display bullet count on screen. Will be find under name 'HUD_bullets' in scene.")]
 	public TextMesh HUD_bullets;
 	void OnGUI(){
+		if (Time.timeScale <= 0f) return;
+		if (UnityEngine.SceneManagement.SceneManager.GetSceneByName("PauseMenu_Hunt").isLoaded || UnityEngine.SceneManagement.SceneManager.GetSceneByName("PauseMenu_Cute").isLoaded) return;
+
 		if(!HUD_bullets){
 			try{
 				HUD_bullets = GameObject.Find("HUD_bullets").GetComponent<TextMesh>();

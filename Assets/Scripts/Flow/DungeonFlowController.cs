@@ -7,9 +7,8 @@ public class DungeonFlowController : MonoBehaviour
     public static DungeonFlowController Instance { get; private set; }
 
     [Header("Door / Extraction Settings")]
-    [Tooltip("ชื่อ GameObject ของประตูวาร์ปกลับร้าน (ค่าเริ่มต้นคือ 'Door')")]
-    public string doorObjectName = "Door";
-    public float interactionDistance = 4.5f;
+    public string doorObjectName = "Door to SRN";
+    public float interactionDistance = 2.5f;
     public string summarySceneName = "ExpeditionSummary_Hunt";
     public string directRestaurantSceneName = "Dev_Restaurant_Flow";
 
@@ -26,6 +25,7 @@ public class DungeonFlowController : MonoBehaviour
     private bool isNearDoor = false;
     private float startTime;
     private bool isExtracting = false;
+    private Texture2D whiteTexture;
 
     private void Awake()
     {
@@ -37,6 +37,10 @@ public class DungeonFlowController : MonoBehaviour
         {
             Destroy(gameObject);
         }
+
+        whiteTexture = new Texture2D(1, 1);
+        whiteTexture.SetPixel(0, 0, Color.white);
+        whiteTexture.Apply();
     }
 
     private void Start()
@@ -71,7 +75,6 @@ public class DungeonFlowController : MonoBehaviour
 
     private void FindPlayerAndDoor()
     {
-        // 1. ค้นหาผู้เล่น
         if (playerTransform == null)
         {
             PlayerHealth ph = FindAnyObjectByType<PlayerHealth>();
@@ -95,41 +98,21 @@ public class DungeonFlowController : MonoBehaviour
             }
         }
 
-        // 2. ค้นหาประตู
         if (doorObject == null)
         {
-            doorObject = GameObject.Find("Door");
-            if (doorObject == null) doorObject = GameObject.Find(doorObjectName);
+            doorObject = GameObject.Find("Door to SRN") ?? GameObject.Find("Door") ?? GameObject.Find(doorObjectName);
 
             if (doorObject == null)
             {
                 GameObject[] all = FindObjectsByType<GameObject>(FindObjectsSortMode.None);
                 foreach (var obj in all)
                 {
-                    if (obj.name.Equals("Door", System.StringComparison.OrdinalIgnoreCase) ||
-                        obj.name.Contains("Exit") || obj.name.Contains("Portal"))
+                    if (obj.name.Contains("Door") || obj.name.Contains("Exit") || obj.name.Contains("Portal"))
                     {
                         doorObject = obj;
                         break;
                     }
                 }
-            }
-
-            // ถ้าไม่มีประตูในฉาก สร้างประตูฉุกเฉินใกล้ผู้เล่น
-            if (doorObject == null && playerTransform != null)
-            {
-                doorObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                doorObject.name = "Door";
-                doorObject.transform.position = playerTransform.position + playerTransform.forward * 4f;
-                doorObject.transform.localScale = new Vector3(2.5f, 3.5f, 0.5f);
-                
-                Collider c = doorObject.GetComponent<Collider>();
-                if (c != null) c.isTrigger = true;
-
-                Renderer r = doorObject.GetComponent<Renderer>();
-                if (r != null) r.material.color = new Color(0.8f, 0.2f, 0.2f, 0.8f);
-                
-                Debug.Log($"Created fallback Dungeon Extraction Door at {doorObject.transform.position}");
             }
         }
     }
@@ -165,21 +148,19 @@ public class DungeonFlowController : MonoBehaviour
     {
         sessionKills++;
         sessionDamage += Random.Range(1200, 2200);
-        Debug.Log($"⚔️ Enemy slain! Total session kills: {sessionKills}");
+        Debug.Log($"Enemy slain! Total session kills: {sessionKills}");
     }
 
     public void ExtractToRestaurant()
     {
         isExtracting = true;
-        Debug.Log("🚪 Extracting from dungeon to restaurant...");
+        Debug.Log("Extracting from dungeon to restaurant...");
 
-        // ดึงจำนวนเนื้อที่เก็บได้
         int beefCount = Mathf.Max(InventoryManager.globalMeatCount, (InventoryManager.Instance != null ? InventoryManager.Instance.meatCount : 0));
         int porkCount = Mathf.Max(InventoryManager.globalPorkCount, (InventoryManager.Instance != null ? InventoryManager.Instance.porkCount : 0));
 
-        Debug.Log($"🏹 Harvested in hunt -> Beef: {beefCount}, Pork: {porkCount}, Kills: {sessionKills}");
+        Debug.Log($"Harvested in hunt -> Beef: {beefCount}, Pork: {porkCount}, Kills: {sessionKills}");
 
-        // บันทึกสถิติลง SummaryDataBridge
         SummaryDataBridge.RecordHuntSession(
             kills: Mathf.Max(sessionKills, beefCount + porkCount),
             beefAmount: beefCount,
@@ -188,11 +169,9 @@ public class DungeonFlowController : MonoBehaviour
             damage: Mathf.Max(sessionDamage, (sessionKills + 1) * 1500)
         );
 
-        // Reset inventory counter for next dungeon run
         InventoryManager.globalMeatCount = 0;
         InventoryManager.globalPorkCount = 0;
 
-        // โหลดหน้าสรุปผลการล่า (Expedition Summary)
         string target = summarySceneName;
         if (!Application.CanStreamedLevelBeLoaded(target))
         {
@@ -220,40 +199,65 @@ public class DungeonFlowController : MonoBehaviour
         }
     }
 
+    private void DrawBox(Rect rect, Color color)
+    {
+        Color old = GUI.color;
+        GUI.color = color;
+        GUI.DrawTexture(rect, whiteTexture);
+        GUI.color = old;
+    }
+
     private void OnGUI()
     {
         if (Time.timeScale <= 0f) return;
         Scene pauseHunt = SceneManager.GetSceneByName(pauseSceneName);
         if (pauseHunt.isLoaded) return;
 
-        if (isNearDoor && !isExtracting)
-        {
-            GUIStyle style = new GUIStyle(GUI.skin.box);
-            style.fontSize = 22;
-            style.fontStyle = FontStyle.Bold;
-            style.alignment = TextAnchor.MiddleCenter;
-            style.normal.textColor = Color.yellow;
+        // 1. Top-Right In-Theme Expedition Card
+        float cardW = 380;
+        float cardH = 44;
+        float cardX = Screen.width - cardW - 16;
+        float cardY = 16;
 
-            float w = 540;
-            float h = 55;
-            float x = (Screen.width - w) / 2f;
-            float y = Screen.height - 130;
+        DrawBox(new Rect(cardX, cardY, cardW, cardH), new Color(0.08f, 0.08f, 0.12f, 0.92f));
 
-            GUI.Box(new Rect(x, y, w, h), "🚪 Press [E] to Return to Restaurant with Loot", style);
-        }
+        GUIStyle headerStyle = new GUIStyle(GUI.skin.label);
+        headerStyle.fontSize = 12;
+        headerStyle.fontStyle = FontStyle.Bold;
+        headerStyle.alignment = TextAnchor.MiddleCenter;
+        headerStyle.normal.textColor = new Color(1.0f, 0.45f, 0.45f);
 
-        // Top-Right Live Stats Banner
-        GUIStyle statsBox = new GUIStyle(GUI.skin.box);
-        statsBox.fontSize = 14;
-        statsBox.fontStyle = FontStyle.Bold;
-        statsBox.alignment = TextAnchor.MiddleRight;
-        statsBox.normal.textColor = new Color(1f, 0.4f, 0.4f);
+        GUIStyle statsStyle = new GUIStyle(GUI.skin.label);
+        statsStyle.fontSize = 11;
+        statsStyle.fontStyle = FontStyle.Bold;
+        statsStyle.alignment = TextAnchor.MiddleCenter;
+        statsStyle.normal.textColor = Color.white;
 
         int m = Mathf.FloorToInt(sessionDuration / 60f);
         int s = Mathf.FloorToInt(sessionDuration % 60f);
         int beef = InventoryManager.Instance != null ? InventoryManager.Instance.meatCount : 0;
         int pork = InventoryManager.Instance != null ? InventoryManager.Instance.porkCount : 0;
 
-        GUI.Box(new Rect(Screen.width - 280, 20, 260, 50), $"🏹 [WILD EXPEDITION - {m:D2}:{s:D2}]\nKills: {sessionKills} | Beef: {beef} | Pork: {pork}", statsBox);
+        GUI.Label(new Rect(cardX, cardY + 4, cardW, 16), $"WILD EXPEDITION  •  Time: {m:D2}:{s:D2}", headerStyle);
+        GUI.Label(new Rect(cardX, cardY + 22, cardW, 16), $"Kills: {sessionKills}   |   Beef: <color=#FFD700>{beef}</color>   |   Pork: <color=#FF9999>{pork}</color>", statsStyle);
+
+        // 2. Door Extraction Prompt (When near door)
+        if (isNearDoor && !isExtracting)
+        {
+            float promptW = 460;
+            float promptH = 36;
+            float promptX = (Screen.width - promptW) / 2f;
+            float promptY = Screen.height - 110;
+
+            DrawBox(new Rect(promptX, promptY, promptW, promptH), new Color(0.08f, 0.08f, 0.12f, 0.92f));
+
+            GUIStyle promptStyle = new GUIStyle(GUI.skin.label);
+            promptStyle.fontSize = 13;
+            promptStyle.fontStyle = FontStyle.Bold;
+            promptStyle.alignment = TextAnchor.MiddleCenter;
+            promptStyle.normal.textColor = new Color(1f, 0.85f, 0.35f);
+
+            GUI.Label(new Rect(promptX, promptY + 8, promptW, 20), "Press [E] to Return to Restaurant with Harvested Meats", promptStyle);
+        }
     }
 }

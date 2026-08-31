@@ -37,7 +37,6 @@ public class ShiftSummaryController : MonoBehaviour
 
     private void Awake()
     {
-        // Start completely blank so nothing is shown prematurely
         if (happyGuestsText != null) happyGuestsText.text = "";
         if (dishesCookedText != null) dishesCookedText.text = "";
         if (ratingLabelText != null) ratingLabelText.text = "";
@@ -50,7 +49,6 @@ public class ShiftSummaryController : MonoBehaviour
         if (financialCardPanel != null) financialCardPanel.SetActive(false);
         if (actionButtonsPanel != null) actionButtonsPanel.SetActive(false);
 
-        // Hide star fills initially
         for (int i = 0; i < ratingStarImages.Count; i++)
         {
             if (ratingStarImages[i] != null && emptyStarSprite != null)
@@ -136,11 +134,11 @@ public class ShiftSummaryController : MonoBehaviour
         if (ratingLabelText != null)
         {
             string rankTitle;
-            if (bridge.starRating >= 4.75f) rankTitle = "⭐ Legendary 5-Star Chef!";
-            else if (bridge.starRating >= 3.8f) rankTitle = "⭐ Great Cooking & Service!";
-            else if (bridge.starRating >= 2.8f) rankTitle = "⭐ Good Shift!";
-            else if (bridge.starRating >= 1.8f) rankTitle = "⭐ Needs More Practice";
-            else rankTitle = "⭐ Tough Day at Shop";
+            if (bridge.starRating >= 4.75f) rankTitle = "Legendary 5-Star Chef!";
+            else if (bridge.starRating >= 3.8f) rankTitle = "Great Cooking & Service!";
+            else if (bridge.starRating >= 2.8f) rankTitle = "Good Shift!";
+            else if (bridge.starRating >= 1.8f) rankTitle = "Needs More Practice";
+            else rankTitle = "Tough Day at Shop";
 
             ratingLabelText.text = $"{bridge.starRating:F1} ({rankTitle})";
             yield return StartCoroutine(SuspenseStatRoller.BounceSlam(ratingLabelText.transform, Vector3.one, 1.15f, 0.18f));
@@ -148,7 +146,7 @@ public class ShiftSummaryController : MonoBehaviour
 
         yield return new WaitForSecondsRealtime(0.2f);
 
-        // 5. Reveal Financial Card & animate rows in strict top-to-bottom order
+        // 5. Reveal Financial Card
         if (financialCardPanel != null)
         {
             financialCardPanel.SetActive(true);
@@ -191,43 +189,64 @@ public class ShiftSummaryController : MonoBehaviour
             yield return StartCoroutine(SuspenseStatRoller.RollNumberCoroutine(
                 customerTipsText,
                 bridge.customerTips,
-                prefix: "Guest Tips Bonus: <color=#FFA500>+",
+                prefix: "Generous Tips: <color=#DAA520>+",
                 suffix: " G</color>",
                 duration: 0.6f,
-                maxRandomNumber: 600
+                maxRandomNumber: 500
             ));
         }
 
         yield return new WaitForSecondsRealtime(0.15f);
 
-        // Fourth Row: TOTAL NET PROFIT (Big Suspense Slam)
+        // Net Profit
         if (netProfitText != null)
         {
+            int net = bridge.netProfit;
+            string colorHex = net >= 0 ? "#2E8B57" : "#D9381E";
+            string sign = net >= 0 ? "+" : "";
+
             yield return StartCoroutine(SuspenseStatRoller.RollNumberCoroutine(
                 netProfitText,
-                bridge.netProfit,
-                prefix: "TOTAL NET PROFIT: <color=#2E8B57>+",
-                suffix: " GOLD</color>",
-                duration: 1.0f,
-                maxRandomNumber: 9999
+                net,
+                prefix: $"Net Profit: <color={colorHex}>{sign}",
+                suffix: " G</color>",
+                duration: 0.8f,
+                maxRandomNumber: 5000
             ));
+
+            yield return StartCoroutine(SuspenseStatRoller.BounceSlam(netProfitText.transform, Vector3.one, 1.25f, 0.25f));
         }
 
-        yield return new WaitForSecondsRealtime(0.25f);
+        yield return new WaitForSecondsRealtime(0.2f);
 
         // 6. Reveal Action Buttons
         if (actionButtonsPanel != null)
         {
             actionButtonsPanel.SetActive(true);
-            yield return StartCoroutine(SuspenseStatRoller.BounceSlam(actionButtonsPanel.transform, Vector3.one, 1.15f, 0.25f));
+            yield return StartCoroutine(SuspenseStatRoller.RevealCardWithPunch(actionButtonsPanel, 0.2f));
+        }
+
+        SetupButtonListeners();
+    }
+
+    private void SetupButtonListeners()
+    {
+        if (okButton != null)
+        {
+            okButton.onClick.RemoveAllListeners();
+            okButton.onClick.AddListener(OnOkClicked);
+        }
+
+        if (mainMenuButton != null)
+        {
+            mainMenuButton.onClick.RemoveAllListeners();
+            mainMenuButton.onClick.AddListener(OnMainMenuClicked);
         }
     }
 
-    public void OnOkButtonClicked()
+    public void OnOkClicked()
     {
-        SummaryDataBridge.ApplyShiftProfitToGameManager();
-        SummaryDataBridge.globalDayNumber++;
-
+        Time.timeScale = 1.0f;
         string target = restaurantSceneName;
         if (!Application.CanStreamedLevelBeLoaded(target))
         {
@@ -236,8 +255,9 @@ public class ShiftSummaryController : MonoBehaviour
         SceneManager.LoadScene(target);
     }
 
-    public void OnReturnToMainMenuClicked()
+    public void OnMainMenuClicked()
     {
+        Time.timeScale = 1.0f;
         SceneManager.LoadScene(mainMenuSceneName);
     }
 }

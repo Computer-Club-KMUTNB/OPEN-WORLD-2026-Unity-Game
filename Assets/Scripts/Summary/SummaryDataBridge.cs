@@ -136,7 +136,7 @@ public class SummaryDataBridge : MonoBehaviour
         globalHarvestedLoot.Add(new LootReward { itemName = "Raw Beef", quantity = beefAmount, iconName = "meat" });
         globalHarvestedLoot.Add(new LootReward { itemName = "Raw Pork", quantity = porkAmount, iconName = "meat" });
 
-        Debug.Log($"🏹 SummaryDataBridge recorded: Kills={kills}, Beef={beefAmount}, Pork={porkAmount}, Time={globalTimeInWild}");
+        Debug.Log($"[SummaryDataBridge] Recorded: Kills={kills}, Beef={beefAmount}, Pork={porkAmount}, Time={globalTimeInWild}");
     }
 
     public static void TransferLootToGameManager()
@@ -147,12 +147,12 @@ public class SummaryDataBridge : MonoBehaviour
         if (beefToAdd > 0)
         {
             GameManager.globalBeef += beefToAdd;
-            Debug.Log($"🥩 Transferred +{beefToAdd} Raw Beef into Pantry! Current Total Beef: {GameManager.globalBeef}");
+            Debug.Log($"Transferred +{beefToAdd} Raw Beef into Pantry! Current Total Beef: {GameManager.globalBeef}");
         }
         if (porkToAdd > 0)
         {
             GameManager.globalPork += porkToAdd;
-            Debug.Log($"🥓 Transferred +{porkToAdd} Raw Pork into Pantry! Current Total Pork: {GameManager.globalPork}");
+            Debug.Log($"Transferred +{porkToAdd} Raw Pork into Pantry! Current Total Pork: {GameManager.globalPork}");
         }
 
         globalHarvestedBeef = 0;
@@ -182,7 +182,7 @@ public class SummaryDataBridge : MonoBehaviour
             {
                 GameManager.Instance.UpdateMoneyText();
             }
-            Debug.Log($"💰 Added Net Profit +{profit} Gold to GameManager. Total Money: {GameManager.globalMoney}");
+            Debug.Log($"Added Net Profit +{profit} Gold to GameManager. Total Money: {GameManager.globalMoney}");
         }
 
         SaveSystem.Save();

@@ -70,7 +70,7 @@ public class PlayerInteraction : MonoBehaviour
                 }
 
                 // 2. ถังขยะ (Trash Can / Bin)
-                if (hit.collider.CompareTag("Trash") || hit.collider.name.ToLower().Contains("trash") || hit.collider.name.ToLower().Contains("bin"))
+                if (hit.collider.name.ToLower().Contains("trash") || hit.collider.name.ToLower().Contains("bin"))
                 {
                     if (!string.IsNullOrEmpty(currentHeldItem))
                     {
@@ -135,7 +135,7 @@ public class PlayerInteraction : MonoBehaviour
 
                 // 6. คอมพิวเตอร์สั่งซื้อของ
                 ComputerTerminal computer = hit.collider.GetComponentInParent<ComputerTerminal>();
-                if (computer != null || hit.collider.CompareTag("Computer") || hit.collider.name.ToLower().Contains("computer"))
+                if (computer != null || hit.collider.name.ToLower().Contains("computer"))
                 {
                     if (computer == null) computer = hit.collider.GetComponent<ComputerTerminal>() ?? hit.collider.GetComponentInParent<ComputerTerminal>();
                     if (computer != null)
@@ -147,7 +147,7 @@ public class PlayerInteraction : MonoBehaviour
 
                 // 7. กระดิ่งเปิด/ปิดร้าน
                 ShopBell bell = hit.collider.GetComponentInParent<ShopBell>();
-                if (bell != null || hit.collider.CompareTag("ShopBell") || hit.collider.name.ToLower().Contains("bell"))
+                if (bell != null || hit.collider.name.ToLower().Contains("bell"))
                 {
                     if (bell == null) bell = hit.collider.GetComponent<ShopBell>() ?? hit.collider.GetComponentInParent<ShopBell>();
                     if (bell != null)

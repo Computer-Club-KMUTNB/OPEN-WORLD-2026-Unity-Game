@@ -118,19 +118,19 @@ public class EnemySpawner : MonoBehaviour
 
     void UpdateUI()
     {
-        if (enemiesRemainingText != null)
+        if (enemiesRemainingText != null && enemiesRemainingText.gameObject.activeSelf)
         {
-            enemiesRemainingText.text = $"Enemies Left: {totalEnemiesRemaining}";
+            enemiesRemainingText.gameObject.SetActive(false);
         }
     }
 
     void RoomCleared()
     {
-        Debug.Log("🎉 เคลียร์ทั้ง 3 Wave สำเร็จ!");
+        Debug.Log("Room Cleared! All waves defeated.");
 
-        if (enemiesRemainingText != null)
+        if (enemiesRemainingText != null && enemiesRemainingText.gameObject.activeSelf)
         {
-            enemiesRemainingText.text = "Room Cleared!";
+            enemiesRemainingText.gameObject.SetActive(false);
         }
 
         if (exitDoor != null)

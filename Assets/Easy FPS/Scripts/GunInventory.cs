@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -178,13 +178,14 @@ public class GunInventory : MonoBehaviour {
 	 * From here I am listing thourhg guns I have and drawing corresponding images on the sceen.
 	 */
 	void OnGUI(){
+		if (Time.timeScale <= 0f) return;
+		if (UnityEngine.SceneManagement.SceneManager.GetSceneByName("PauseMenu_Hunt").isLoaded || UnityEngine.SceneManagement.SceneManager.GetSceneByName("PauseMenu_Cute").isLoaded) return;
 
 		if(currentGun){
 			for(int i = 0; i < gunsIHave.Count; i++){
 				DrawCorrespondingImage(i);
 			}
 		}
-
 	}
 
 	[Header("GUI Gun preview variables")]

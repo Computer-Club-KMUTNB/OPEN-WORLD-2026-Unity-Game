@@ -103,6 +103,9 @@ def rebuild_dungeon_flow():
     with open(src, "r", encoding="utf-8") as f:
         content = f.read()
 
+    # Disable legacy GameOverPanel
+    content = re.sub(r'(!u!1 &661331842[\s\S]*?m_IsActive: )1', r'\g<1>0', content)
+
     manager_yaml = """--- !u!1 &990000010
 GameObject:
   m_ObjectHideFlags: 0

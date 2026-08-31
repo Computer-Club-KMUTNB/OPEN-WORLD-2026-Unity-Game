@@ -138,7 +138,7 @@ public class RestaurantFlowController : MonoBehaviour
         }
 
         if (customerSpawner != null) customerSpawner.StartShift();
-        Debug.Log("🍽️ [RestaurantFlow] Restaurant opened via Service Bell!");
+        Debug.Log("[RestaurantFlow] Restaurant opened via Service Bell!");
     }
 
     public void StartShift()
@@ -157,7 +157,7 @@ public class RestaurantFlowController : MonoBehaviour
     public void EndRestaurantShift()
     {
         isShiftActive = false;
-        Debug.Log("🍰 Closing restaurant shift & calculating summary...");
+        Debug.Log("Closing restaurant shift & calculating summary...");
 
         if (customerSpawner != null)
         {
@@ -343,22 +343,22 @@ public class RestaurantFlowController : MonoBehaviour
             if (hit.collider.GetComponentInParent<ShopBell>() != null || hitObj.name.ToLower().Contains("bell"))
             {
                 currentHoverText = isShiftActive 
-                    ? "🛎️ [Click / E] Ring Bell to End Shift" 
-                    : "🛎️ [Click / E] Ring Bell to Open Shop";
+                    ? "[Click / E] Ring Bell to End Shift" 
+                    : "[Click / E] Ring Bell to Open Shop";
                 return;
             }
 
             if (hit.collider.GetComponentInParent<ComputerTerminal>() != null || hitObj.name.ToLower().Contains("computer"))
             {
-                currentHoverText = "💻 [Click / E] Buy Rice & Veggies (100 G)";
+                currentHoverText = "[Click / E] Buy Rice & Veggies (100 G)";
                 return;
             }
 
             if (hitObj == dungeonDoorObject || hit.transform.IsChildOf(dungeonDoorObject.transform) || hitObj.name.Contains("DoortoJR"))
             {
                 currentHoverText = isShiftActive 
-                    ? "🔒 [Locked] Close shop before hunting" 
-                    : "🥩 [Click / E] Go Hunting! (Get Beef & Pork)";
+                    ? "[Locked] Close shop before hunting" 
+                    : "[Click / E] Go Hunting! (Get Beef & Pork)";
                 return;
             }
 
@@ -373,7 +373,7 @@ public class RestaurantFlowController : MonoBehaviour
                     else if (box.ingredientName == "RawRice") stock = GameManager.globalRice;
                     else if (box.ingredientName == "RawVeggie") stock = GameManager.globalVeggie;
                 }
-                currentHoverText = $"📦 [Click / E] Take {box.ingredientName} ({stock})";
+                currentHoverText = $"[Click / E] Take {box.ingredientName} ({stock})";
                 return;
             }
 
@@ -382,23 +382,23 @@ public class RestaurantFlowController : MonoBehaviour
             {
                 if (station.hasFinishedFood)
                 {
-                    currentHoverText = $"✨ [Click / E] Take {station.resultFoodName}";
+                    currentHoverText = $"[Click / E] Take {station.resultFoodName}";
                 }
                 else if (station.isCooking)
                 {
-                    currentHoverText = "🍳 Cooking...";
+                    currentHoverText = "Cooking...";
                 }
                 else
                 {
-                    currentHoverText = $"🔥 [Click / E] Cook {station.requiredIngredient}";
+                    currentHoverText = $"[Click / E] Cook {station.requiredIngredient}";
                 }
                 return;
             }
 
             // Trash Can
-            if (hit.collider.CompareTag("Trash") || hitObj.name.ToLower().Contains("trash") || hitObj.name.ToLower().Contains("bin"))
+            if (hitObj.name.ToLower().Contains("trash") || hitObj.name.ToLower().Contains("bin"))
             {
-                currentHoverText = "🗑️ [Click / Q] Trash Can (Discard Item)";
+                currentHoverText = "[Click / Q] Trash Can (Discard Item)";
                 return;
             }
 
@@ -407,15 +407,15 @@ public class RestaurantFlowController : MonoBehaviour
             {
                 if (plate.finalDish == "BurntMess")
                 {
-                    currentHoverText = "🤢 [Click / E] Pick up Burnt Mess (Throw in Trash)";
+                    currentHoverText = "[Click / E] Pick up Burnt Mess (Throw in Trash)";
                 }
                 else if (plate.finalDish != "")
                 {
-                    currentHoverText = $"✨ [Click / E] Pick up {plate.finalDish}";
+                    currentHoverText = $"[Click / E] Pick up {plate.finalDish}";
                 }
                 else
                 {
-                    currentHoverText = "🍽️ [Click / E] Plate Station (Mix Ingredients)";
+                    currentHoverText = "[Click / E] Plate Station (Mix Ingredients)";
                 }
                 return;
             }
@@ -423,7 +423,7 @@ public class RestaurantFlowController : MonoBehaviour
             CustomerAI customer = hit.collider.GetComponentInParent<CustomerAI>();
             if (customer != null)
             {
-                currentHoverText = "🐱 [Click / E] Serve Customer";
+                currentHoverText = "[Click / E] Serve Customer";
                 return;
             }
         }
@@ -439,7 +439,7 @@ public class RestaurantFlowController : MonoBehaviour
 
     public void EmbarkToDungeon()
     {
-        Debug.Log("⚔️ Embarking to Dungeon Hunt...");
+        Debug.Log("Embarking to Dungeon Hunt...");
         string target = dungeonSceneName;
         if (!Application.CanStreamedLevelBeLoaded(target))
         {
@@ -497,41 +497,38 @@ public class RestaurantFlowController : MonoBehaviour
 
     private void OnGUI()
     {
-        // -------------------------------------------------------------
-        // PREVENT HUD DRAWING OVER PAUSE MENU (FREEZE OVERLAY FIX)
-        // -------------------------------------------------------------
         if (Time.timeScale <= 0f) return;
         Scene pauseCute = SceneManager.GetSceneByName(pauseSceneName);
         if (pauseCute.isLoaded) return;
 
         // -------------------------------------------------------------
-        // 1. LARGER & CLEARER 3D WORLD FLOATING PROMPTS
+        // 1. 3D WORLD FLOATING PROMPTS (NO EMOJIS)
         // -------------------------------------------------------------
         if (bellObject != null)
         {
-            string bellMsg = isShiftActive ? "🛎️ BELL: [Click / E] Close Shift" : "🛎️ BELL: [Click / E] Open Shop";
-            DrawWorldPrompt(bellObject.transform.position + Vector3.up * 0.55f, bellMsg, new Color(1f, 0.85f, 0.3f), 300, 34);
+            string bellMsg = isShiftActive ? "BELL: [Click / E] Close Shift" : "BELL: [Click / E] Open Shop";
+            DrawWorldPrompt(bellObject.transform.position + Vector3.up * 0.55f, bellMsg, new Color(1f, 0.85f, 0.3f), 280, 34);
         }
 
         if (computerObject != null)
         {
-            DrawWorldPrompt(computerObject.transform.position + Vector3.up * 0.75f, "💻 COMPUTER: [Click / E] Buy Rice & Veg (100G)", new Color(0.45f, 0.85f, 1f), 340, 34);
+            DrawWorldPrompt(computerObject.transform.position + Vector3.up * 0.75f, "COMPUTER: [Click / E] Buy Rice & Veg (100G)", new Color(0.45f, 0.85f, 1f), 320, 34);
         }
 
         if (dungeonDoorObject != null)
         {
             if (!isShiftActive)
             {
-                DrawWorldPrompt(dungeonDoorObject.transform.position + Vector3.up * 2.3f, "🥩 DUNGEON HUNT: [Press E] Get Beef & Pork!", new Color(1f, 0.45f, 0.4f), 360, 36);
+                DrawWorldPrompt(dungeonDoorObject.transform.position + Vector3.up * 2.3f, "DUNGEON HUNT: [Press E] Get Beef & Pork", new Color(1f, 0.45f, 0.4f), 340, 36);
             }
             else
             {
-                DrawWorldPrompt(dungeonDoorObject.transform.position + Vector3.up * 2.3f, "🔒 DOOR LOCKED (In Shift)", new Color(0.7f, 0.7f, 0.7f), 260, 32);
+                DrawWorldPrompt(dungeonDoorObject.transform.position + Vector3.up * 2.3f, "[Locked] Close shift before hunting", new Color(0.7f, 0.7f, 0.7f), 280, 32);
             }
         }
 
         // -------------------------------------------------------------
-        // 2. TOP-CENTER CUTE STATUS BANNER & PASTEL TIME BAR (COMPACT & FITTED)
+        // 2. TOP-CENTER STATUS BANNER & PROGRESS TIME BAR
         // -------------------------------------------------------------
         float bannerW = 440;
         float bannerH = isShiftActive ? 62 : 38;
@@ -554,7 +551,7 @@ public class RestaurantFlowController : MonoBehaviour
         if (!isShiftActive)
         {
             statusHeader.normal.textColor = new Color(0.45f, 0.95f, 0.6f);
-            GUI.Label(new Rect(bannerX, bannerY + 8, bannerW, 22), "🍵 PREPARATION MODE  •  🛎️ Ring Bell to Open Shop!", statusHeader);
+            GUI.Label(new Rect(bannerX, bannerY + 8, bannerW, 22), "PREPARATION MODE  •  Ring Bell to Open Shop", statusHeader);
         }
         else
         {
@@ -566,9 +563,8 @@ public class RestaurantFlowController : MonoBehaviour
             int remMin = Mathf.FloorToInt(currentRemaining / 60f);
             int remSec = Mathf.FloorToInt(currentRemaining % 60f);
 
-            GUI.Label(new Rect(bannerX, bannerY + 4, bannerW, 18), $"🍽️ SHOP OPEN  •  ⏱️ {remMin:D2}:{remSec:D2}  •  Served: {servedOrders}", statusHeader);
+            GUI.Label(new Rect(bannerX, bannerY + 4, bannerW, 18), $"SHOP OPEN  •  Time: {remMin:D2}:{remSec:D2}  •  Served: {servedOrders}", statusHeader);
 
-            // Cute Pastel Progress Bar
             float barW = bannerW - 32;
             float barH = 8;
             float barX = bannerX + 16;
@@ -579,11 +575,11 @@ public class RestaurantFlowController : MonoBehaviour
             Color barColor = progress > 0.45f ? new Color(0.4f, 0.92f, 0.55f) : (progress > 0.2f ? new Color(1f, 0.85f, 0.3f) : new Color(1f, 0.45f, 0.45f));
             DrawBox(new Rect(barX, barY, barW * progress, barH), barColor);
 
-            GUI.Label(new Rect(bannerX, bannerY + 38, bannerW, 18), "🛎️ Click Bell on counter to End Shift", subLabel);
+            GUI.Label(new Rect(bannerX, bannerY + 38, bannerW, 18), "Click Bell on counter to End Shift", subLabel);
         }
 
         // -------------------------------------------------------------
-        // 3. TOP-LEFT CUTE PANTRY & MONEY HUD (CLEAN & FIT)
+        // 3. TOP-LEFT PANTRY & MONEY HUD
         // -------------------------------------------------------------
         float pantryW = 420;
         float pantryH = 38;
@@ -601,32 +597,33 @@ public class RestaurantFlowController : MonoBehaviour
         int veggie = GameManager.globalVeggie;
         int money = GameManager.globalMoney;
 
-        GUI.Label(new Rect(16, 24, pantryW, 20), $"🥩 {beef}   🥓 {pork}   🥦 {veggie}   🍚 {rice}   |   💰 <color=#FFD700>{money} G</color>", stockStyle);
+        GUI.Label(new Rect(16, 24, pantryW, 20), $"Beef: {beef}   Pork: {pork}   Veggie: {veggie}   Rice: {rice}   |   Gold: <color=#FFD700>{money} G</color>", stockStyle);
 
         // -------------------------------------------------------------
-        // 4. BOTTOM-LEFT ON-SCREEN COOKING & SUPPLIES GUIDE (RESTORED)
+        // 4. BOTTOM-LEFT ON-SCREEN GUIDE (BIGGER & WRAPPED)
         // -------------------------------------------------------------
-        float guideW = 560;
-        float guideH = 88;
+        float guideW = 760;
+        float guideH = 126;
         float guideX = 16;
         float guideY = Screen.height - guideH - 16;
 
-        DrawBox(new Rect(guideX, guideY, guideW, guideH), new Color(0.1f, 0.1f, 0.14f, 0.92f));
+        DrawBox(new Rect(guideX, guideY, guideW, guideH), new Color(0.08f, 0.08f, 0.12f, 0.95f));
 
         GUIStyle guideTitle = new GUIStyle(GUI.skin.label);
-        guideTitle.fontSize = 13;
+        guideTitle.fontSize = 15;
         guideTitle.fontStyle = FontStyle.Bold;
-        guideTitle.normal.textColor = new Color(0.95f, 0.85f, 0.4f);
+        guideTitle.normal.textColor = new Color(1f, 0.88f, 0.4f);
 
         GUIStyle guideBody = new GUIStyle(GUI.skin.label);
-        guideBody.fontSize = 11;
+        guideBody.fontSize = 13;
         guideBody.fontStyle = FontStyle.Normal;
-        guideBody.normal.textColor = new Color(0.9f, 0.9f, 0.95f);
+        guideBody.wordWrap = true;
+        guideBody.normal.textColor = new Color(0.92f, 0.92f, 0.96f);
 
-        GUI.Label(new Rect(guideX + 12, guideY + 6, guideW - 24, 18), "📖 RESTAURANT & COOKING GUIDE", guideTitle);
-        GUI.Label(new Rect(guideX + 12, guideY + 25, guideW - 24, 16), "🍳 Cooking: 1. Click Box (Take) ➔ 2. Stove (Cook) ➔ 3. Take Cooked ➔ 4. Plate Table ➔ 5. Serve!", guideBody);
-        GUI.Label(new Rect(guideX + 12, guideY + 44, guideW - 24, 16), "💻 Supplies: Click Computer Terminal to Buy 🥦 Veggie (+5) & 🍚 Rice (+5) for 100 Gold", guideBody);
-        GUI.Label(new Rect(guideX + 12, guideY + 63, guideW - 24, 16), "🏹 Raw Meats: Enter Glowing Red Door in Prep Mode to hunting for Beef & Pork!", guideBody);
+        GUI.Label(new Rect(guideX + 16, guideY + 8, guideW - 32, 22), "RESTAURANT & COOKING GUIDE", guideTitle);
+        GUI.Label(new Rect(guideX + 16, guideY + 34, guideW - 32, 24), "Cooking: 1. Click Box (Take) -> 2. Stove (Cook) -> 3. Take Cooked -> 4. Plate Table -> 5. Serve", guideBody);
+        GUI.Label(new Rect(guideX + 16, guideY + 62, guideW - 32, 24), "Supplies: Click Computer Terminal to Buy Veggie (+5) & Rice (+5) for 100 Gold", guideBody);
+        GUI.Label(new Rect(guideX + 16, guideY + 90, guideW - 32, 24), "Raw Meats: Enter Glowing Red Door in Prep Mode to hunting for Beef & Pork!", guideBody);
 
         // -------------------------------------------------------------
         // 5. CENTER CROSSHAIR HOVER PROMPT
@@ -650,7 +647,7 @@ public class RestaurantFlowController : MonoBehaviour
         }
         else if (isNearDungeonDoor)
         {
-            float doorPromptW = 380;
+            float doorPromptW = 340;
             float doorPromptH = 34;
             float doorPromptX = (Screen.width - doorPromptW) / 2f;
             float doorPromptY = Screen.height - 110;
@@ -665,12 +662,12 @@ public class RestaurantFlowController : MonoBehaviour
             if (!isShiftActive)
             {
                 doorStyle.normal.textColor = new Color(1.0f, 0.45f, 0.45f);
-                GUI.Label(new Rect(doorPromptX, doorPromptY + 7, doorPromptW, 20), "🥩 Press [E] to Get Beef & Pork", doorStyle);
+                GUI.Label(new Rect(doorPromptX, doorPromptY + 7, doorPromptW, 20), "Press [E] to Get Beef & Pork", doorStyle);
             }
             else
             {
                 doorStyle.normal.textColor = new Color(1.0f, 0.7f, 0.3f);
-                GUI.Label(new Rect(doorPromptX, doorPromptY + 7, doorPromptW, 20), "🔒 Door locked during shift", doorStyle);
+                GUI.Label(new Rect(doorPromptX, doorPromptY + 7, doorPromptW, 20), "[Locked] Close shift before hunting", doorStyle);
             }
         }
     }
