@@ -129,7 +129,21 @@ public class GameManager : MonoBehaviour
         tipsEarnedToday += tip;
 
         UpdateMoneyText();
+        SaveSystem.Save();
         Debug.Log($"🍽️ Food Served! Got money {price} + Tip {tip} Baht | Total Money: {playerMoney}");
+    }
+
+    private void OnApplicationQuit()
+    {
+        SaveSystem.Save();
+    }
+
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        if (pauseStatus)
+        {
+            SaveSystem.Save();
+        }
     }
 
     // ฟังก์ชันบันทึกการทำอาหารเสร็จ

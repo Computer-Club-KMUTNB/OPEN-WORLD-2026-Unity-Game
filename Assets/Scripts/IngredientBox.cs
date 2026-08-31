@@ -78,6 +78,7 @@ public class IngredientBox : MonoBehaviour
         if (success)
         {
             UpdateDisplay();
+            SaveSystem.Save();
             return true;
         }
         

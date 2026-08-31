@@ -440,6 +440,7 @@ public class RestaurantFlowController : MonoBehaviour
     public void EmbarkToDungeon()
     {
         Debug.Log("Embarking to Dungeon Hunt...");
+        SaveSystem.Save();
         string target = dungeonSceneName;
         if (!Application.CanStreamedLevelBeLoaded(target))
         {
