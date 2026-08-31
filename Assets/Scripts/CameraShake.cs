@@ -8,6 +8,8 @@ public class CameraShake : MonoBehaviour
     private Vector3 baseLocalPosition;
     private bool isShaking = false;
 
+    public bool IsShaking => isShaking;
+
     void Awake()
     {
         if (Instance == null) Instance = this;

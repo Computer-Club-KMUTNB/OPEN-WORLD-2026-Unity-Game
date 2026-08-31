@@ -107,21 +107,13 @@ public class InventoryManager : MonoBehaviour
     public void UpdateUI()
     {
         AutoFindUI();
-        if (meatText != null)
+        if (meatText != null && meatText.gameObject.activeSelf)
         {
-            if (globalPorkCount > 0 && porkText == null)
-            {
-                meatText.text = $"Beef: {globalMeatCount} | Pork: {globalPorkCount}";
-            }
-            else
-            {
-                meatText.text = $"Meat : {globalMeatCount}";
-            }
+            meatText.gameObject.SetActive(false);
         }
-
-        if (porkText != null)
+        if (porkText != null && porkText.gameObject.activeSelf)
         {
-            porkText.text = $"Pork : {globalPorkCount}";
+            porkText.gameObject.SetActive(false);
         }
     }
 }

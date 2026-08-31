@@ -4,35 +4,32 @@ using UnityEngine.AI;
 
 public class EnemyAI : MonoBehaviour
 {
-    [Header("Health Settings")]
-    public float maxHealth = 100f;
-    public float currentHealth;
+    [Header("Target & Movement")]
+    public Transform player;
+    public float attackRange = 2.8f;
+    public float moveSpeed = 3.5f;
 
     [Header("Combat Settings")]
-    public float attackDamage = 15f;
-    public float attackRange = 2.2f;
-    public float attackRate = 1.6f;
-    [Tooltip("ระยะเวลาหน่วงให้แอนิเมชันฟันลงมาก่อน ค่อยหักเลือดผู้เล่น (วินาที)")]
-    public float damageDelay = 0.5f; 
-    private float nextAttackTime = 0f;
+    public float attackDamage = 25f;
+    public float attackCooldown = 1.6f;
+    public float damageDelay = 0.45f;
+    private float lastAttackTime;
+    private bool hasDealtDamageThisAttack = false;
 
-    [Header("Animation Attack Cycling")]
-    public int totalAttackAnimations = 2;
-    private int currentAttackIndex = 0;
+    [Header("Stats")]
+    public float maxHealth = 50f;
+    public float currentHealth;
+    public float deathDelay = 1.5f;
 
-    [Header("Drops")]
+    [Header("Loot Drop")]
     public GameObject meatDropPrefab;
 
-    [Header("Death Settings")]
-    public float deathDelay = 2.0f;
-
-    private Transform player;
-    private PlayerHealth playerHealth;
+    [Header("References")]
     private NavMeshAgent agent;
     private Animator anim;
     private Collider col;
-    private EnemySpawner spawnerRef;
     private bool isDead = false;
+    private EnemySpawner spawnerRef;
 
     public void SetSpawner(EnemySpawner spawner)
     {
@@ -43,73 +40,124 @@ public class EnemyAI : MonoBehaviour
     {
         currentHealth = maxHealth;
         agent = GetComponent<NavMeshAgent>();
-        anim = GetComponentInChildren<Animator>();
+        anim = GetComponent<Animator>();
         col = GetComponent<Collider>();
 
-        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-        if (playerObj != null)
+        if (agent != null)
         {
-            player = playerObj.transform;
-            playerHealth = playerObj.GetComponent<PlayerHealth>();
+            agent.speed = moveSpeed;
+            agent.stoppingDistance = Mathf.Max(1.0f, attackRange - 0.5f);
+        }
+
+        FindPlayer();
+    }
+
+    private void FindPlayer()
+    {
+        if (player != null) return;
+
+        PlayerHealth ph = FindAnyObjectByType<PlayerHealth>();
+        if (ph != null) player = ph.transform;
+        else
+        {
+            FirstPersonController fpc = FindAnyObjectByType<FirstPersonController>();
+            if (fpc != null) player = fpc.transform;
+            else if (Camera.main != null) player = Camera.main.transform;
         }
     }
 
     void Update()
     {
-        if (isDead || player == null || agent == null || !agent.isOnNavMesh) return;
+        if (isDead) return;
 
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-
-        if (distanceToPlayer <= attackRange)
+        if (player == null)
         {
-            // หยุดเดิน หันหน้าเข้าหาผู้เล่น
-            agent.isStopped = true;
-            LookAtPlayer();
+            FindPlayer();
+            if (player == null) return;
+        }
 
-            if (anim != null) anim.SetBool("isMoving", false);
+        float distance = Vector3.Distance(transform.position, player.position);
 
-            if (Time.time >= nextAttackTime)
+        if (distance > attackRange)
+        {
+            if (agent != null && agent.isOnNavMesh)
             {
-                StartCoroutine(PerformAttackRoutine());
-                nextAttackTime = Time.time + attackRate;
+                agent.isStopped = false;
+                agent.SetDestination(player.position);
+            }
+            if (anim != null)
+            {
+                anim.SetBool("isMoving", true);
             }
         }
         else
         {
-            // วิ่งไล่ตามผู้เล่น
-            agent.isStopped = false;
-            agent.SetDestination(player.position);
+            if (agent != null && agent.isOnNavMesh)
+            {
+                agent.isStopped = true;
+            }
+            if (anim != null)
+            {
+                anim.SetBool("isMoving", false);
+            }
 
-            if (anim != null) anim.SetBool("isMoving", true);
+            Vector3 lookPos = new Vector3(player.position.x, transform.position.y, player.position.z);
+            transform.LookAt(lookPos);
+
+            if (Time.time >= lastAttackTime + attackCooldown)
+            {
+                Attack();
+            }
         }
     }
 
-    void LookAtPlayer()
+    void Attack()
     {
-        Vector3 targetPos = new Vector3(player.position.x, transform.position.y, player.position.z);
-        transform.LookAt(targetPos);
-    }
+        lastAttackTime = Time.time;
+        hasDealtDamageThisAttack = false;
 
-    IEnumerator PerformAttackRoutine()
-    {
-        // 1. สั่งเล่นท่าแอนิเมชันฟัน
         if (anim != null)
         {
-            anim.SetInteger("attackIndex", currentAttackIndex);
             anim.SetTrigger("Attack");
-
-            currentAttackIndex = (currentAttackIndex + 1) % totalAttackAnimations;
         }
 
-        // 2. รอจังหวะให้ขวาน/เท้าฟันสับลงมาก่อน (ตามเวลา damageDelay)
+        StartCoroutine(AttackRoutine());
+    }
+
+    private IEnumerator AttackRoutine()
+    {
+        // หน่วงเวลารอจังหวะง้างฟันของแอนิเมชัน
         yield return new WaitForSeconds(damageDelay);
 
-        // 3. ตรวจสอบว่าถ้ายังไม่ตาย และผู้เล่นยังอยู่ในระยะ จึงหักเลือดจริง
-        if (!isDead && player != null && Vector3.Distance(transform.position, player.position) <= attackRange + 0.5f)
+        if (!hasDealtDamageThisAttack && !isDead)
         {
+            DealDamageToPlayer();
+        }
+    }
+
+    // เรียกได้ทั้งจาก Coroutine และ Animation Event
+    public void DealDamage()
+    {
+        if (!hasDealtDamageThisAttack && !isDead)
+        {
+            DealDamageToPlayer();
+        }
+    }
+
+    private void DealDamageToPlayer()
+    {
+        if (player == null) FindPlayer();
+        if (player == null || isDead) return;
+
+        float dist = Vector3.Distance(transform.position, player.position);
+        if (dist <= attackRange + 1.2f)
+        {
+            PlayerHealth playerHealth = player.GetComponent<PlayerHealth>() ?? player.GetComponentInParent<PlayerHealth>();
             if (playerHealth != null)
             {
+                hasDealtDamageThisAttack = true;
                 playerHealth.TakeDamage(attackDamage);
+                Debug.Log($"Enemy dealt {attackDamage} DMG to player! (Player HP: {playerHealth.currentHealth})");
             }
         }
     }
@@ -159,29 +207,41 @@ public class EnemyAI : MonoBehaviour
             anim.SetTrigger("Die");
         }
 
+        bool isMonster2 = gameObject.name.ToLower().Contains("monster2") || gameObject.name.ToLower().Contains("pork");
+
         if (meatDropPrefab == null)
         {
-            meatDropPrefab = GameObject.Find("MeatDrop") ?? GameObject.Find("MeatPickup") ?? Resources.Load<GameObject>("MeatDrop");
+            string prefabToLook = isMonster2 ? "Pork" : "Meat";
+            meatDropPrefab = Resources.Load<GameObject>(prefabToLook) ?? GameObject.Find(prefabToLook);
         }
 
         if (meatDropPrefab != null)
         {
-            Instantiate(meatDropPrefab, transform.position + Vector3.up * 0.5f, Quaternion.identity);
-            Debug.Log($"🥩 Spawn Meat Drop at {transform.position}");
+            GameObject drop = Instantiate(meatDropPrefab, transform.position + Vector3.up * 0.5f, Quaternion.identity);
+            ItemPickup pickup = drop.GetComponentInChildren<ItemPickup>();
+            if (pickup == null)
+            {
+                pickup = drop.AddComponent<ItemPickup>();
+                pickup.itemType = isMonster2 ? ItemPickup.ItemType.Pork : ItemPickup.ItemType.Meat;
+                pickup.amount = 1;
+            }
+            Debug.Log($"Spawned Loot Drop ({pickup.itemType}) at {transform.position}");
         }
         else
         {
-            Debug.LogWarning("⚠️ meatDropPrefab ยังว่างใน EnemyAI กำลังสร้าง Dropped Item ชั่วคราว...");
-            // Spawn a Meat drop with ItemPickup
             GameObject meatObj = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            meatObj.name = "RawBeefDrop";
+            meatObj.name = isMonster2 ? "RawPorkDrop" : "RawBeefDrop";
             meatObj.transform.position = transform.position + Vector3.up * 0.5f;
             meatObj.transform.localScale = new Vector3(0.6f, 0.2f, 0.6f);
+            
             ItemPickup mp = meatObj.AddComponent<ItemPickup>();
-            mp.itemType = ItemPickup.ItemType.Meat;
+            mp.itemType = isMonster2 ? ItemPickup.ItemType.Pork : ItemPickup.ItemType.Meat;
             mp.amount = 1;
+
             Renderer mr = meatObj.GetComponent<Renderer>();
-            if (mr != null) mr.material.color = new Color(0.85f, 0.2f, 0.2f);
+            if (mr != null) mr.material.color = isMonster2 ? new Color(0.95f, 0.6f, 0.6f) : new Color(0.85f, 0.2f, 0.2f);
+            
+            Debug.Log($"Created Loot Drop ({mp.itemType}) at {transform.position}");
         }
 
         yield return new WaitForSeconds(deathDelay);

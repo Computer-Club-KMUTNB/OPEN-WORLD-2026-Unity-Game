@@ -21,10 +21,13 @@ public class ItemPickup : MonoBehaviour
     [Header("Pickup Settings")]
     [Tooltip("หน่วงเวลาเล็กน้อยก่อนเปิดให้เก็บ")]
     public float pickupDelay = 0.2f;
+    [Tooltip("ระยะแม่เหล็กดูดเก็บไอเทมอัตโนมัติเมื่อผู้เล่นเดินเข้าใกล้")]
+    public float pickupRadius = 2.4f;
 
     private bool canPickup = false;
     private bool hasPickedUp = false;
     private Collider itemCollider;
+    private Transform playerTransform;
 
     private void Awake()
     {
@@ -34,6 +37,7 @@ public class ItemPickup : MonoBehaviour
     private void Start()
     {
         Invoke(nameof(EnablePickup), pickupDelay);
+        FindPlayer();
     }
 
     private void EnablePickup()
@@ -41,31 +45,71 @@ public class ItemPickup : MonoBehaviour
         canPickup = true;
     }
 
+    private void FindPlayer()
+    {
+        PlayerHealth ph = FindAnyObjectByType<PlayerHealth>();
+        if (ph != null) playerTransform = ph.transform;
+        else
+        {
+            FirstPersonController fpc = FindAnyObjectByType<FirstPersonController>();
+            if (fpc != null) playerTransform = fpc.transform;
+            else if (Camera.main != null) playerTransform = Camera.main.transform;
+        }
+    }
+
     void Update()
     {
         transform.Rotate(Vector3.up, rotateSpeed * Time.deltaTime, Space.World);
+
+        if (!canPickup || hasPickedUp) return;
+
+        // Proximity Pickup Check (รับประกันการเก็บเนื้อได้ 100% แม้ Trigger Collider จะมีขนาดต่างกัน)
+        if (playerTransform == null) FindPlayer();
+        if (playerTransform != null)
+        {
+            float dist = Vector3.Distance(transform.position, playerTransform.position);
+            if (dist <= pickupRadius)
+            {
+                CollectItem();
+            }
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        // ถ้ายังไม่เปิดให้เก็บ หรือถูกเก็บไปแล้วในเฟรมนี้ ให้หยุดทันที
         if (!canPickup || hasPickedUp) return;
-
-        // เช็กว่าเป็นตัวละคร Player
-        bool isPlayer = other.CompareTag("Player");
-        if (!isPlayer && other.attachedRigidbody != null)
+        if (IsPlayer(other))
         {
-            isPlayer = other.attachedRigidbody.CompareTag("Player");
+            CollectItem();
         }
+    }
 
-        if (!isPlayer) return;
+    private void OnTriggerStay(Collider other)
+    {
+        if (!canPickup || hasPickedUp) return;
+        if (IsPlayer(other))
+        {
+            CollectItem();
+        }
+    }
 
-        // ⚠️ ล็อกสถานะทันที และปิด Collider ของตัวไอเทมเพื่อไม่ให้ Collider ชิ้นที่ 2 ของ Player มาโดนซ้ำ
+    private bool IsPlayer(Collider other)
+    {
+        if (other == null) return false;
+        if (other.CompareTag("Player")) return true;
+        if (other.attachedRigidbody != null && other.attachedRigidbody.CompareTag("Player")) return true;
+        if (other.GetComponentInParent<PlayerHealth>() != null) return true;
+        if (other.GetComponentInParent<FirstPersonController>() != null) return true;
+        if (other.name.ToLower().Contains("player")) return true;
+        return false;
+    }
+
+    private void CollectItem()
+    {
+        if (hasPickedUp) return;
         hasPickedUp = true;
-        if (itemCollider != null)
-        {
-            itemCollider.enabled = false;
-        }
+
+        if (itemCollider != null) itemCollider.enabled = false;
 
         InventoryManager manager = InventoryManager.Instance != null
             ? InventoryManager.Instance
@@ -83,7 +127,6 @@ public class ItemPickup : MonoBehaviour
             }
         }
 
-        // ลบวัตถุออกจากฉาก
         Destroy(gameObject);
     }
 }
