@@ -77,7 +77,6 @@ public class ShiftSummaryController : MonoBehaviour
         {
             GameObject go = new GameObject("SummaryDataBridge");
             bridge = go.AddComponent<SummaryDataBridge>();
-            bridge.PopulateDefaultDemoDataIfEmpty();
         }
 
         yield return new WaitForSecondsRealtime(0.2f);
@@ -219,7 +218,15 @@ public class ShiftSummaryController : MonoBehaviour
 
     public void OnOkButtonClicked()
     {
-        SceneManager.LoadScene(restaurantSceneName);
+        SummaryDataBridge.ApplyShiftProfitToGameManager();
+        SummaryDataBridge.globalDayNumber++;
+
+        string target = restaurantSceneName;
+        if (!Application.CanStreamedLevelBeLoaded(target))
+        {
+            target = "restaurant-scene";
+        }
+        SceneManager.LoadScene(target);
     }
 
     public void OnReturnToMainMenuClicked()
