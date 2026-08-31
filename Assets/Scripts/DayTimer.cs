@@ -10,7 +10,6 @@ public class DayTimer : MonoBehaviour
 
     [Header("UI")]
     public TextMeshProUGUI timerTextUI;
-    public SummaryUI summaryUI;
 
     void Start()
     {
@@ -47,10 +46,5 @@ public class DayTimer : MonoBehaviour
     {
         isDayEnded = true;
         Debug.Log("☀️ หมดเวลากลางวันแล้ว! เปิดหน้าต่างสรุปผล...");
-
-        if (summaryUI != null)
-        {
-            summaryUI.ShowSummaryPanel();
-        }
     }
 }
