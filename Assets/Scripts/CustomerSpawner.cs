@@ -7,38 +7,84 @@ public class CustomerSpawner : MonoBehaviour
     public GameObject customerPrefab; // ลูกค้าที่จะเสก
     public Transform spawnPoint;      // จุดที่จะให้ลูกค้าโผล่
     public float spawnInterval = 5f;  // เวลาหน่วงระหว่างเรียกลูกค้าแต่ละคน (วินาที)
+    
+    [Header("Shift Control (การควบคุมกะ)")]
+    public bool autoStart = false;    // เริ่มกะทันทีที่โหลดฉากหรือไม่
+    public bool isShiftActive = false; // สถานะกะปัจจุบัน
 
-    // 🟢 เปลี่ยนจาก Start() เป็น OnEnable() เพื่อให้ลูปทำงานใหม่ทุกครั้งที่กดเปิดร้าน
     void OnEnable()
     {
+        try
+        {
+            if (spawnPoint == null)
+            {
+                GameObject sp = GameObject.Find("SpawnPoint");
+                if (sp == null) sp = GameObject.Find("CustomerSpawnPoint");
+                if (sp != null) spawnPoint = sp.transform;
+            }
+        }
+        catch (System.Exception)
+        {
+            spawnPoint = null;
+        }
+
+        if (autoStart)
+        {
+            isShiftActive = true;
+        }
+
         StartCoroutine(SpawnCustomerRoutine());
+    }
+
+    public void StartShift()
+    {
+        isShiftActive = true;
+        Debug.Log("🍽️ Shift started! Customers will now arrive.");
+    }
+
+    public void StopShift()
+    {
+        isShiftActive = false;
+        Debug.Log("🍽️ Shift stopped! No new customers will arrive.");
     }
 
     IEnumerator SpawnCustomerRoutine()
     {
-        // ลูปนี้จะทำงานไปเรื่อยๆ ตราบใดที่วัตถุนี้ถูกเปิดใช้งานอยู่
         while (true)
         {
-            // 🛑 ดักเช็คแบบเด็ดขาด: ต้องมั่นใจว่า DayTimer บอกว่า "ร้านเปิดแล้ว" จริงๆ ถึงจะทำงาน
             DayTimer timer = FindFirstObjectByType<DayTimer>();
-            
-            if (timer != null && timer.isShopOpen == true)
+            bool canSpawn = isShiftActive || (timer != null && timer.isShopOpen);
+
+            if (!canSpawn)
             {
-                // 1. เช็คก่อนว่ามีโต๊ะว่างเหลือ
-                Seat[] allSeats = FindObjectsByType<Seat>(FindObjectsSortMode.None);
-                int occupiedCount = 0;
-                
+                yield return new WaitForSeconds(0.5f);
+                continue;
+            }
+
+            // 1. เช็คก่อนว่ามีโต๊ะว่างเหลือ
+            Seat[] allSeats = FindObjectsByType<Seat>(FindObjectsSortMode.None);
+            int occupiedCount = 0;
+            if (allSeats != null && allSeats.Length > 0)
+            {
                 foreach (Seat seat in allSeats)
                 {
-                    if (seat.isOccupied) occupiedCount++;
+                    if (seat != null && seat.isOccupied) occupiedCount++;
+                }
+            }
+
+            // 2. ถ้าเก้าอี้ยังไม่เต็มร้านถึงจะเสกลูกค้าใหม่
+            if (allSeats != null && allSeats.Length > 0 && occupiedCount < allSeats.Length && customerPrefab != null)
+            {
+                Vector3 pos = transform.position;
+                Quaternion rot = transform.rotation;
+                if (spawnPoint != null)
+                {
+                    pos = spawnPoint.position;
+                    rot = spawnPoint.rotation;
                 }
 
-                // 2. ถ้าเก้าอี้ยังไม่เต็มร้านถึงจะเสกลูกค้าใหม่
-                if (occupiedCount < allSeats.Length)
-                {
-                    Instantiate(customerPrefab, spawnPoint.position, spawnPoint.rotation);
-                    Debug.Log("เสกลูกค้าใหม่เข้าร้านแล้ว!");
-                }
+                Instantiate(customerPrefab, pos, rot);
+                Debug.Log("เสกลูกค้าใหม่เข้าร้านแล้ว!");
             }
 
             // 3. รอเวลา X วินาทีก่อนจะเช็คและเสกคนต่อไป

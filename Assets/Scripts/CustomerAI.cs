@@ -157,6 +157,11 @@ public class CustomerAI : MonoBehaviour
                 GameManager gm = GameManager.Instance;
                 if (gm != null) gm.RecordFoodServed(basePrice, calculatedTip);
 
+                if (RestaurantFlowController.Instance != null)
+                {
+                    RestaurantFlowController.Instance.RegisterCustomerServed(true);
+                }
+
                 StartCoroutine(EatAndLeave());
 
                 return true;

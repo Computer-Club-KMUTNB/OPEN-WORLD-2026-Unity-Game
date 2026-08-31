@@ -139,6 +139,11 @@ public class EnemyAI : MonoBehaviour
             spawnerRef.OnEnemyKilled();
         }
 
+        if (DungeonFlowController.Instance != null)
+        {
+            DungeonFlowController.Instance.RegisterEnemyKilled();
+        }
+
         if (agent != null && agent.isOnNavMesh)
         {
             agent.isStopped = true;
@@ -154,9 +159,32 @@ public class EnemyAI : MonoBehaviour
             anim.SetTrigger("Die");
         }
 
+        if (meatDropPrefab == null)
+        {
+            meatDropPrefab = GameObject.Find("MeatDrop") ?? GameObject.Find("MeatPickup") ?? Resources.Load<GameObject>("MeatDrop");
+        }
+
         if (meatDropPrefab != null)
         {
             Instantiate(meatDropPrefab, transform.position + Vector3.up * 0.5f, Quaternion.identity);
+            Debug.Log($"🥩 Spawn Meat Drop at {transform.position}");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ meatDropPrefab ยังว่างใน EnemyAI กรุณากลับไปผูก Prefab Meat ลงใน Inspector");
+        }
+        else
+        {
+            // Spawn a Meat drop with MeatPickup
+            GameObject meatObj = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            meatObj.name = "RawBeefDrop";
+            meatObj.transform.position = transform.position + Vector3.up * 0.5f;
+            meatObj.transform.localScale = new Vector3(0.6f, 0.2f, 0.6f);
+            MeatPickup mp = meatObj.AddComponent<MeatPickup>();
+            mp.meatKind = MeatPickup.MeatKind.RawBeef;
+            mp.amount = 1;
+            Renderer mr = meatObj.GetComponent<Renderer>();
+            if (mr != null) mr.material.color = new Color(0.85f, 0.2f, 0.2f);
         }
 
         yield return new WaitForSeconds(deathDelay);

@@ -18,6 +18,14 @@ public class PlayerHealth : MonoBehaviour
     [Range(0f, 1f)] public float maxFlashAlpha = 0.45f;
     public float fadeSpeed = 2.0f;
 
+    [Header("Camera Shake Settings")]
+    [Tooltip("ระยะเวลาที่กล้องสั่น (วินาที)")]
+    public float shakeDuration = 0.25f;
+    [Tooltip("ความแรงในการขยับตำแหน่งกล้อง")]
+    public float shakePosMagnitude = 0.15f;
+    [Tooltip("ความแรงในการบิดเอียงมุมกล้อง")]
+    public float shakeRotMagnitude = 2.5f;
+
     [Header("Game Over UI")]
     [Tooltip("ลาก GameOverPanel มาใส่ช่องนี้")]
     public GameObject gameOverPanel;
@@ -46,6 +54,7 @@ public class PlayerHealth : MonoBehaviour
 
     void Update()
     {
+        // ค่อยๆ ลดความเข้มของสีแดงบนหน้าจอ
         if (damageFlashImage != null && damageFlashImage.color.a > 0f)
         {
             Color c = damageFlashImage.color;
@@ -62,11 +71,18 @@ public class PlayerHealth : MonoBehaviour
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
         UpdateHealthUI();
 
+        // 1. เรียกเอฟเฟกต์หน้าจอแดง
         if (damageFlashImage != null)
         {
             Color c = damageFlashImage.color;
             c.a = maxFlashAlpha;
             damageFlashImage.color = c;
+        }
+
+        // 2. เรียกกล้องสั่น (ส่งค่าแรงสั่นและมุมเอียง)
+        if (CameraShake.Instance != null)
+        {
+            CameraShake.Instance.Shake(shakeDuration, shakePosMagnitude, shakeRotMagnitude);
         }
 
         if (currentHealth <= 0)
@@ -104,7 +120,7 @@ public class PlayerHealth : MonoBehaviour
             gameOverPanel.SetActive(true);
         }
 
-        // หยุดเวลาในเกม (ศัตรูจะหยุดนิ่งทันที)
+        // หยุดเวลาในเกม
         Time.timeScale = 0f;
     }
 
@@ -113,6 +129,13 @@ public class PlayerHealth : MonoBehaviour
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    // ฟังก์ชันสำหรับปุ่ม Return to Restaurant / Main Menu
+    public void LoadSceneByName(string sceneName)
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(sceneName);
     }
 
     // ฟังก์ชันสำหรับปุ่ม Quit

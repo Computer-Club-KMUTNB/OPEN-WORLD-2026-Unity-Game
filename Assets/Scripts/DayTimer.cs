@@ -5,16 +5,15 @@ public class DayTimer : MonoBehaviour
 {
     [Header("ตั้งค่าเวลา")]
     public float dayDuration = 180f; // เวลาใน 1 วัน (เช่น 180 วินาที = 3 นาที)
-    private float timeRemaining;
+    public float timeRemaining;
     public bool isShopOpen = false;  // สถานะเปิด/ปิดร้าน
-    private bool isDayEnded = false;
+    public bool isDayEnded = false;
 
     [Header("UI & Systems")]
     public TextMeshProUGUI timerTextUI;
-    public SummaryUI summaryUI;        // หน้าต่างสรุปผล
 
     [Header("Customer Spawner")]
-    // 🟢 เปลี่ยนเป็น GameObject จะได้ลากวัตถุจาก Hierarchy มาใส่ได้ทันที!
+    [Tooltip("ลากวัตถุ CustomerSpawner จาก Hierarchy มาใส่")]
     public GameObject customerSpawnerObj; 
 
     void Start()
@@ -22,7 +21,7 @@ public class DayTimer : MonoBehaviour
         timeRemaining = dayDuration;
         UpdateTimerUI();
 
-        // เริ่มเกมมา ปิดจุดเสกลูกค้าให้ซ่อนไว้ก่อน
+        // เริ่มเกมมา ปิดจุดเสกลูกค้าให้ซ่อนไว้ก่อน (รอจนกว่าจะกดกระดิ่งหรือเริ่มกะ)
         if (customerSpawnerObj != null) customerSpawnerObj.SetActive(false);
     }
 
@@ -51,8 +50,11 @@ public class DayTimer : MonoBehaviour
         isDayEnded = false;
         Debug.Log("🔔 เปิดร้านแล้ว! เริ่มนับเวลาและเรียกลูกค้า");
 
-        // 🟢 เปิดจุดเสกลูกค้าให้ทำงาน
+        // เปิดจุดเสกลูกค้าให้ทำงาน
         if (customerSpawnerObj != null) customerSpawnerObj.SetActive(true);
+
+        CustomerSpawner spawner = FindFirstObjectByType<CustomerSpawner>();
+        if (spawner != null) spawner.StartShift();
     }
 
     public void CloseShop()
@@ -63,12 +65,24 @@ public class DayTimer : MonoBehaviour
         isDayEnded = true;
         Debug.Log("🔔 ปิดร้านแล้ว! หยุดรับลูกค้าและเปิดหน้าต่างสรุปผล");
 
-        // 🟢 ปิดจุดเสกลูกค้า ไม่ให้คนเข้ามาเพิ่ม
+        // ปิดจุดเสกลูกค้า ไม่ให้คนเข้ามาเพิ่ม
         if (customerSpawnerObj != null) customerSpawnerObj.SetActive(false);
 
-        if (summaryUI != null)
+        CustomerSpawner spawner = FindFirstObjectByType<CustomerSpawner>();
+        if (spawner != null) spawner.StopShift();
+
+        EndDay();
+    }
+
+    public void EndDay()
+    {
+        isDayEnded = true;
+        Debug.Log("☀️ หมดเวลากลางวันแล้ว! เปิดหน้าต่างสรุปผล...");
+
+        RestaurantFlowController flow = FindFirstObjectByType<RestaurantFlowController>();
+        if (flow != null)
         {
-            summaryUI.ShowSummaryPanel();
+            flow.EndRestaurantShift();
         }
     }
 

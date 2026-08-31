@@ -32,6 +32,10 @@ public class CookingStation : MonoBehaviour
         
         isCooking = false;
         hasFinishedFood = true;
+        if (RestaurantFlowController.Instance != null)
+        {
+            RestaurantFlowController.Instance.RegisterDishCooked();
+        }
         Debug.Log(gameObject.name + " ทำอาหารเสร็จแล้ว พร้อมเสิร์ฟ " + resultFoodName);
     }
 
