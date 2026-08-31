@@ -139,6 +139,11 @@ public class EnemyAI : MonoBehaviour
             spawnerRef.OnEnemyKilled();
         }
 
+        if (DungeonFlowController.Instance != null)
+        {
+            DungeonFlowController.Instance.RegisterEnemyKilled();
+        }
+
         if (agent != null && agent.isOnNavMesh)
         {
             agent.isStopped = true;

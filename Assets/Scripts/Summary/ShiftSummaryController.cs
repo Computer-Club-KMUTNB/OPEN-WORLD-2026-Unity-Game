@@ -219,7 +219,12 @@ public class ShiftSummaryController : MonoBehaviour
 
     public void OnOkButtonClicked()
     {
-        SceneManager.LoadScene(restaurantSceneName);
+        string target = restaurantSceneName;
+        if (!Application.CanStreamedLevelBeLoaded(target))
+        {
+            target = "restaurant-scene";
+        }
+        SceneManager.LoadScene(target);
     }
 
     public void OnReturnToMainMenuClicked()

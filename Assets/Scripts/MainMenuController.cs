@@ -5,7 +5,7 @@ public class MainMenuController : MonoBehaviour
 {
     [Header("Scene Configuration")]
     [Tooltip("The name of the scene to load when clicking Start Game")]
-    [SerializeField] private string sceneName = "restaurant-scene";
+    [SerializeField] private string sceneName = "Dev_Restaurant_Flow";
 
     [Tooltip("The name of the scene to load when clicking Credits")]
     [SerializeField] private string creditsSceneName = "EndCredit";
@@ -28,14 +28,14 @@ public class MainMenuController : MonoBehaviour
     /// </summary>
     public void StartGame()
     {
-        if (string.IsNullOrEmpty(sceneName))
+        string target = sceneName;
+        if (!Application.CanStreamedLevelBeLoaded(target))
         {
-            Debug.LogError("[MainMenuController] Scene name is empty! Please assign a scene name in the Inspector.", this);
-            return;
+            target = "restaurant-scene";
         }
 
-        Debug.Log($"[MainMenuController] Starting game. Loading scene: '{sceneName}'");
-        SceneManager.LoadScene(sceneName);
+        Debug.Log($"[MainMenuController] Starting game. Loading scene: '{target}'");
+        SceneManager.LoadScene(target);
     }
 
     /// <summary>

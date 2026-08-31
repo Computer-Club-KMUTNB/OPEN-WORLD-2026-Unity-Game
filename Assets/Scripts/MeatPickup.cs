@@ -2,12 +2,20 @@ using UnityEngine;
 
 public class MeatPickup : MonoBehaviour
 {
+    public enum MeatKind { RawBeef, RawPork }
+    
+    [Header("Item Type")]
+    public MeatKind meatKind = MeatKind.RawBeef;
+    public int amount = 1;
     public float rotateSpeed = 60f;
 
     void Update()
     {
         // หมุนไอเทมรอบแกน Y เพื่อเอฟเฟกต์สวยงาม
-        transform.Rotate(Vector3.up * rotateSpeed * Time.deltaTime);
+        if (rotateSpeed > 0f)
+        {
+            transform.Rotate(Vector3.up * rotateSpeed * Time.deltaTime);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -28,10 +36,17 @@ public class MeatPickup : MonoBehaviour
 
     void CollectItem()
     {
-        // สั่งให้ InventoryManager เพิ่มเนื้อ 1 ชิ้น
         if (InventoryManager.Instance != null)
         {
-            InventoryManager.Instance.AddMeat(1);
+            bool isPork = (meatKind == MeatKind.RawPork) || gameObject.name.ToLower().Contains("pork");
+            if (isPork)
+            {
+                InventoryManager.Instance.AddPork(amount);
+            }
+            else
+            {
+                InventoryManager.Instance.AddMeat(amount);
+            }
         }
 
         Destroy(gameObject);

@@ -460,7 +460,7 @@ MonoBehaviour:
   actionButtonsPanel: {fileID: 600}
   backToRestaurantButton: {fileID: 614}
   mainMenuButton: {fileID: 634}
-  restaurantSceneName: restaurant-scene
+  restaurantSceneName: Dev_Restaurant_Flow
   mainMenuSceneName: MainMenu
 --- !u!1 &210
 GameObject:
@@ -2887,7 +2887,7 @@ MonoBehaviour:
   actionButtonsPanel: {fileID: 600}
   okButton: {fileID: 614}
   mainMenuButton: {fileID: 624}
-  restaurantSceneName: restaurant-scene
+  restaurantSceneName: Dev_Restaurant_Flow
   mainMenuSceneName: MainMenu
 --- !u!1 &210
 GameObject:

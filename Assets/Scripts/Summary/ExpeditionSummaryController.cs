@@ -167,7 +167,17 @@ public class ExpeditionSummaryController : MonoBehaviour
 
     public void OnBackToRestaurantClicked()
     {
-        SceneManager.LoadScene(restaurantSceneName);
+        if (SummaryDataBridge.Instance != null)
+        {
+            SummaryDataBridge.Instance.TransferLootToGameManager();
+        }
+
+        string target = restaurantSceneName;
+        if (!Application.CanStreamedLevelBeLoaded(target))
+        {
+            target = "restaurant-scene";
+        }
+        SceneManager.LoadScene(target);
     }
 
     public void OnReturnToMainMenuClicked()
