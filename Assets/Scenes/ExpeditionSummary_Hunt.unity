@@ -457,7 +457,7 @@ MonoBehaviour:
   actionButtonsPanel: {fileID: 600}
   backToRestaurantButton: {fileID: 614}
   mainMenuButton: {fileID: 634}
-  restaurantSceneName: restaurant-scene
+  restaurantSceneName: Dev_Restaurant_Flow
   mainMenuSceneName: MainMenu
 --- !u!1 &210
 GameObject:
@@ -2135,7 +2135,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 616}
+  - {fileID: 617}
   m_Father: {fileID: 601}
   m_AnchorMin: {x: 0.05, y: 0.5}
   m_AnchorMax: {x: 0.60, y: 0.5}
@@ -2292,7 +2292,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 636}
+  - {fileID: 637}
   m_Father: {fileID: 601}
   m_AnchorMin: {x: 0.65, y: 0.5}
   m_AnchorMax: {x: 0.95, y: 0.5}
