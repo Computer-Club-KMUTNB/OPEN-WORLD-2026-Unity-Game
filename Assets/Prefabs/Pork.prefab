@@ -102,9 +102,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1865878182617246551}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 93eeda6be72091b4ba1a745c684a2ca0, type: 3}
+  m_Script: {fileID: 11500000, guid: 94d9624e0f0ba9b4c974f2c0e3e4c838, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeatPickup
+  itemType: 1
+  amount: 1
   rotateSpeed: 0
 --- !u!135 &2267550637086755833
 SphereCollider:

@@ -6,43 +6,82 @@ public class InventoryManager : MonoBehaviour
     public static InventoryManager Instance;
 
     [Header("UI References")]
-    [Tooltip("ลาก MeatCounterText มาใส่ที่ช่องนี้")]
+    [Tooltip("ลาก MeatCounterText จากใต้ Canvas มาใส่")]
     public TextMeshProUGUI meatText;
+    [Tooltip("ลาก PorkCounterText จากใต้ Canvas มาใส่")]
+    public TextMeshProUGUI porkText;
 
-    private int meatCount = 0;
+    [Header("Current Inventory")]
+    public int meatCount = 0;
+    public int porkCount = 0;
 
     void Awake()
     {
-        // ทำ Singleton เพื่อให้สคริปต์อื่นเรียกใช้ได้ทันที
         if (Instance == null)
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
             Destroy(gameObject);
+            return;
         }
+
+        AutoFindUI();
     }
 
     void Start()
     {
-        UpdateMeatUI();
+        AutoFindUI();
+        UpdateUI();
     }
 
-    // ฟังก์ชันเพิ่มจำนวนเนื้อ
+    private void AutoFindUI()
+    {
+        if (meatText == null)
+        {
+            meatText = GameObject.Find("MeatCounterText")?.GetComponent<TextMeshProUGUI>();
+            if (meatText == null)
+            {
+                meatText = GameObject.Find("MeatText")?.GetComponent<TextMeshProUGUI>();
+            }
+        }
+
+        if (porkText == null)
+        {
+            porkText = GameObject.Find("PorkCounterText")?.GetComponent<TextMeshProUGUI>();
+            if (porkText == null)
+            {
+                porkText = GameObject.Find("PorkText")?.GetComponent<TextMeshProUGUI>();
+            }
+        }
+    }
+
     public void AddMeat(int amount = 1)
     {
         meatCount += amount;
-        UpdateMeatUI();
-        Debug.Log("🥩 จำนวนเนื้อปัจจุบัน: " + meatCount);
+        UpdateUI();
+        Debug.Log($"🥩 ได้รับ Meat! ยอดรวม: {meatCount}");
     }
 
-    // อัปเดตข้อความบนจอ
-    void UpdateMeatUI()
+    public void AddPork(int amount = 1)
+    {
+        porkCount += amount;
+        UpdateUI();
+        Debug.Log($"🍖 ได้รับ Pork! ยอดรวม: {porkCount}");
+    }
+
+    public void UpdateUI()
     {
         if (meatText != null)
         {
-            meatText.text = "Meat: " + meatCount;
+            meatText.text = $"Meat : {meatCount}";
+        }
+
+        if (porkText != null)
+        {
+            porkText.text = $"Pork : {porkCount}";
         }
     }
 }
