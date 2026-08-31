@@ -1,85 +1,108 @@
 {
-  "gameTitle": "RESTAURANT SIMULATOR",
-  "gameSubtitle": "An Open World Experience",
+  "gameTitle": "CUTE RESTAURANT SIMULATOR",
+  "gameSubtitle": "A Culinary & Dungeon Hunting Adventure",
   "sections": [
     {
-      "header": "PROJECT DIRECTION",
+      "header": "PROJECT LEADERSHIP & INTEGRATION",
       "roles": [
         {
-          "roleTitle": "Game Director",
+          "roleTitle": "Game Director & Integration Lead",
           "names": [
-            "Director Name"
+            "Pitak Patumwan (Ohm)"
           ]
         },
         {
-          "roleTitle": "Lead Producer",
+          "roleTitle": "System Architecture & Scene Connector",
           "names": [
-            "Producer Name"
+            "Pitak Patumwan (Ohm)"
           ]
         }
       ]
     },
     {
-      "header": "PROGRAMMING & SYSTEMS",
+      "header": "DUNGEON & COMBAT SYSTEMS",
       "roles": [
         {
-          "roleTitle": "Lead Gameplay Programmer",
+          "roleTitle": "Lead Dungeon & Combat Designer",
           "names": [
-            "Lead Programmer"
+            "Suppanut Posiri (sara-r)"
           ]
         },
         {
-          "roleTitle": "Restaurant & AI Mechanics",
+          "roleTitle": "Enemy AI & Spawner Mechanics",
           "names": [
-            "AI Programmer",
-            "Mechanics Developer"
+            "Suppanut Posiri (sara-r)"
           ]
         },
         {
-          "roleTitle": "UI & Menu Systems",
+          "roleTitle": "Dungeon Level & Environmental Design",
           "names": [
-            "UI Programmer"
+            "Suppanut Posiri (sara-r)"
           ]
         }
       ]
     },
     {
-      "header": "ART & VISUAL DESIGN",
+      "header": "RESTAURANT & CULINARY SYSTEMS",
       "roles": [
         {
-          "roleTitle": "3D Environment & Models",
+          "roleTitle": "Lead Restaurant & Culinary Designer",
           "names": [
-            "3D Environment Artist"
+            "Saranpoom S. Saranpoom"
           ]
         },
         {
-          "roleTitle": "Character Design & Animation",
+          "roleTitle": "Cooking Recipes & Plate Assembly Mechanics",
           "names": [
-            "Character Modeler",
-            "Animator"
+            "Saranpoom S. Saranpoom"
           ]
         },
         {
-          "roleTitle": "Lighting & Visual Effects",
+          "roleTitle": "Customer AI & Service Workflow",
           "names": [
-            "Technical Artist"
+            "Saranpoom S. Saranpoom"
           ]
         }
       ]
     },
     {
-      "header": "AUDIO & SOUND DESIGN",
+      "header": "GAMEPLAY & SYSTEMS ENGINEERING",
       "roles": [
         {
-          "roleTitle": "Music Composer",
+          "roleTitle": "Core Gameplay Programming",
           "names": [
-            "Composer Name"
+            "Pitak Patumwan (Ohm)",
+            "Suppanut Posiri (sara-r)",
+            "Saranpoom S. Saranpoom"
           ]
         },
         {
-          "roleTitle": "Sound Effects & Ambience",
+          "roleTitle": "Economy, Summary & Data Persistence",
           "names": [
-            "Sound Designer"
+            "Pitak Patumwan (Ohm)"
+          ]
+        }
+      ]
+    },
+    {
+      "header": "ART & FRAMEWORK ATTRIBUTIONS",
+      "roles": [
+        {
+          "roleTitle": "Kitchen & Restaurant 3D Environment",
+          "names": [
+            "CuteMagic Room Kitchen"
+          ]
+        },
+        {
+          "roleTitle": "Dungeon Ruins & Monster Assets",
+          "names": [
+            "Dungeon Ruins & Monster Series"
+          ]
+        },
+        {
+          "roleTitle": "FPS & Weapons Framework",
+          "names": [
+            "Easy FPS Framework"
           ]
         }
       ]
@@ -88,12 +111,16 @@
       "header": "SPECIAL THANKS",
       "roles": [
         {
-          "roleTitle": "Community & Support",
+          "roleTitle": "Organization & Community",
           "names": [
             "Computer Club KMUTNB",
-            "Playtesting & Quality Assurance Team",
-            "Unity Community & Asset Creators",
-            "Family & Friends"
+            "King Mongkut's University of Technology North Bangkok"
+          ]
+        },
+        {
+          "roleTitle": "Support & Playtesting",
+          "names": [
+            "Family, Friends & All Dedicated Players"
           ]
         }
       ]

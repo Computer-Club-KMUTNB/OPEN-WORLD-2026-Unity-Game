@@ -402,20 +402,36 @@ public class CreditsController : MonoBehaviour
     private CreditsData GetFallbackCreditsData()
     {
         CreditsData fallback = new CreditsData();
-        fallback.gameTitle = "RESTAURANT SIMULATOR";
-        fallback.gameSubtitle = "Computer Club KMUTNB";
+        fallback.gameTitle = "CUTE RESTAURANT SIMULATOR";
+        fallback.gameSubtitle = "A Culinary & Dungeon Hunting Adventure";
         fallback.sections = new List<CreditSection>
         {
             new CreditSection
             {
-                header = "DEVELOPMENT TEAM",
+                header = "PROJECT LEADERSHIP & INTEGRATION",
                 roles = new List<CreditRole>
                 {
-                    new CreditRole { roleTitle = "Project Development", names = new List<string> { "Developer" } }
+                    new CreditRole { roleTitle = "Game Director & Integration Lead", names = new List<string> { "Pitak Patumwan (Ohm)" } }
+                }
+            },
+            new CreditSection
+            {
+                header = "DUNGEON & COMBAT SYSTEMS",
+                roles = new List<CreditRole>
+                {
+                    new CreditRole { roleTitle = "Lead Dungeon & Combat Designer", names = new List<string> { "Suppanut Posiri (sara-r)" } }
+                }
+            },
+            new CreditSection
+            {
+                header = "RESTAURANT & CULINARY SYSTEMS",
+                roles = new List<CreditRole>
+                {
+                    new CreditRole { roleTitle = "Lead Restaurant & Culinary Designer", names = new List<string> { "Saranpoom S. Saranpoom" } }
                 }
             }
         };
-        fallback.footer = "Thank You For Playing!";
+        fallback.footer = "THANK YOU FOR PLAYING!";
         return fallback;
     }
 }
