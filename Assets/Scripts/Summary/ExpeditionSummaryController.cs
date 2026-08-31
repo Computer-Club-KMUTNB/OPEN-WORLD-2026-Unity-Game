@@ -68,7 +68,6 @@ public class ExpeditionSummaryController : MonoBehaviour
         {
             GameObject go = new GameObject("SummaryDataBridge");
             bridge = go.AddComponent<SummaryDataBridge>();
-            bridge.PopulateDefaultDemoDataIfEmpty();
         }
 
         yield return new WaitForSecondsRealtime(0.2f);
@@ -148,10 +147,30 @@ public class ExpeditionSummaryController : MonoBehaviour
             {
                 var loot = bridge.harvestedLoot[i];
                 if (i < lootNameTexts.Count && lootNameTexts[i] != null) lootNameTexts[i].text = loot.itemName;
-                if (i < lootQtyTexts.Count && lootQtyTexts[i] != null) lootQtyTexts[i].text = $"x{loot.quantity}";
+                if (i < lootQtyTexts.Count && lootQtyTexts[i] != null) lootQtyTexts[i].text = "x0";
 
                 yield return StartCoroutine(SuspenseStatRoller.RevealCardWithPunch(lootCardObjects[i], duration: 0.22f));
-                yield return new WaitForSecondsRealtime(0.08f);
+
+                if (i < lootQtyTexts.Count && lootQtyTexts[i] != null && loot.quantity > 0)
+                {
+                    yield return StartCoroutine(SuspenseStatRoller.RollNumberCoroutine(
+                        lootQtyTexts[i],
+                        loot.quantity,
+                        prefix: "x",
+                        duration: 0.35f,
+                        maxRandomNumber: Mathf.Max(9, loot.quantity * 2)
+                    ));
+                }
+                else if (i < lootQtyTexts.Count && lootQtyTexts[i] != null)
+                {
+                    lootQtyTexts[i].text = $"x{loot.quantity}";
+                }
+
+                yield return new WaitForSecondsRealtime(0.06f);
+            }
+            else if (lootCardObjects[i] != null)
+            {
+                lootCardObjects[i].SetActive(false);
             }
         }
 
@@ -167,10 +186,7 @@ public class ExpeditionSummaryController : MonoBehaviour
 
     public void OnBackToRestaurantClicked()
     {
-        if (SummaryDataBridge.Instance != null)
-        {
-            SummaryDataBridge.Instance.TransferLootToGameManager();
-        }
+        SummaryDataBridge.TransferLootToGameManager();
 
         string target = restaurantSceneName;
         if (!Application.CanStreamedLevelBeLoaded(target))

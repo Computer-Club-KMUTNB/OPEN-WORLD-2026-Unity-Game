@@ -163,6 +163,19 @@ public class EnemyAI : MonoBehaviour
         {
             Instantiate(meatDropPrefab, transform.position + Vector3.up * 0.5f, Quaternion.identity);
         }
+        else
+        {
+            // Spawn a Meat drop with MeatPickup
+            GameObject meatObj = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            meatObj.name = "RawBeefDrop";
+            meatObj.transform.position = transform.position + Vector3.up * 0.5f;
+            meatObj.transform.localScale = new Vector3(0.6f, 0.2f, 0.6f);
+            MeatPickup mp = meatObj.AddComponent<MeatPickup>();
+            mp.meatKind = MeatPickup.MeatKind.RawBeef;
+            mp.amount = 1;
+            Renderer mr = meatObj.GetComponent<Renderer>();
+            if (mr != null) mr.material.color = new Color(0.85f, 0.2f, 0.2f);
+        }
 
         yield return new WaitForSeconds(deathDelay);
 

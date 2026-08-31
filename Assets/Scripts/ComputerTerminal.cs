@@ -16,6 +16,7 @@ public class ComputerTerminal : MonoBehaviour
             {
                 gm.rawRiceStock += orderAmount;
                 gm.rawVeggieStock += orderAmount;
+                SaveSystem.Save();
                 Debug.Log("สั่งซื้อสำเร็จ จ่ายเงิน " + orderCost + " บาท | ข้าว=" + gm.rawRiceStock + " | ผัก=" + gm.rawVeggieStock);
             }
             else

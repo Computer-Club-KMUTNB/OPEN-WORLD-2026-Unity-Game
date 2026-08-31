@@ -20,6 +20,39 @@ public class PauseMenuController : MonoBehaviour
     private CursorLockMode previousCursorLockMode;
     private bool previousCursorVisible;
 
+    private void Awake()
+    {
+        // 1. De-duplicate AudioListener if loaded additively
+        AudioListener[] listeners = FindObjectsByType<AudioListener>(FindObjectsSortMode.None);
+        if (listeners.Length > 1)
+        {
+            AudioListener myListener = GetComponentInChildren<AudioListener>(true);
+            if (myListener == null)
+            {
+                Camera cam = GetComponentInChildren<Camera>(true);
+                if (cam != null) myListener = cam.GetComponent<AudioListener>();
+            }
+            if (myListener != null)
+            {
+                myListener.enabled = false;
+            }
+        }
+
+        // 2. De-duplicate EventSystem if loaded additively
+        UnityEngine.EventSystems.EventSystem[] eventSystems = FindObjectsByType<UnityEngine.EventSystems.EventSystem>(FindObjectsSortMode.None);
+        if (eventSystems.Length > 1)
+        {
+            foreach (var es in eventSystems)
+            {
+                if (es != null && es.gameObject.scene == gameObject.scene)
+                {
+                    Destroy(es.gameObject);
+                    break;
+                }
+            }
+        }
+    }
+
     private void Start()
     {
         // Ensure menu starts closed unless testing
@@ -86,10 +119,17 @@ public class PauseMenuController : MonoBehaviour
         isPaused = false;
         Time.timeScale = 1f;
 
-        Cursor.lockState = previousCursorLockMode;
-        Cursor.visible = previousCursorVisible;
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
 
         if (pauseMenuRoot != null) pauseMenuRoot.SetActive(false);
+
+        // If loaded additively, unload the pause menu scene so background and canvas are completely removed
+        Scene currentScene = gameObject.scene;
+        if (currentScene.isLoaded && SceneManager.sceneCount > 1)
+        {
+            SceneManager.UnloadSceneAsync(currentScene);
+        }
     }
 
     public void OpenSettings()

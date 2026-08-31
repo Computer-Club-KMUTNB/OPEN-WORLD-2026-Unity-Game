@@ -140,18 +140,15 @@ public class RestaurantFlowController : MonoBehaviour
         int tips = Mathf.Max(0, happyGuests * 20);
         float rating = (totalGuests > 0) ? Mathf.Clamp(5.0f * happyGuests / totalGuests, 1.0f, 5.0f) : 5.0f;
 
-        if (SummaryDataBridge.Instance != null)
-        {
-            SummaryDataBridge.Instance.RecordShiftSession(
-                happy: Mathf.Max(happyGuests, servedOrders > 0 ? servedOrders : 18),
-                total: Mathf.Max(totalGuests, servedOrders > 0 ? servedOrders : 20),
-                dishes: Mathf.Max(dishesCooked, 18),
-                revenue: revenue > 0 ? revenue : 2450,
-                upkeep: upkeep > 0 ? upkeep : 350,
-                tips: tips > 0 ? tips : 300,
-                rating: rating
-            );
-        }
+        SummaryDataBridge.RecordShiftSession(
+            happy: Mathf.Max(happyGuests, servedOrders),
+            total: Mathf.Max(totalGuests, servedOrders),
+            dishes: dishesCooked,
+            revenue: revenue,
+            upkeep: upkeep,
+            tips: tips,
+            rating: rating
+        );
 
         string target = shiftSummarySceneName;
         if (!Application.CanStreamedLevelBeLoaded(target))
@@ -333,5 +330,20 @@ public class RestaurantFlowController : MonoBehaviour
             int s = Mathf.FloorToInt(shiftTimer % 60f);
             GUI.Box(new Rect(boxX, boxY, boxW, boxH), $"🍽️ [RESTAURANT OPEN - {m:D2}:{s:D2}]\nOrders Served: {servedOrders} | Dishes: {dishesCooked}\nPress [C] to Close Shift & Summary", bannerBox);
         }
+
+        // 3. Top-Left Live Pantry Inventory HUD
+        GUIStyle pantryBox = new GUIStyle(GUI.skin.box);
+        pantryBox.fontSize = 14;
+        pantryBox.fontStyle = FontStyle.Bold;
+        pantryBox.alignment = TextAnchor.MiddleLeft;
+        pantryBox.normal.textColor = Color.white;
+
+        int beef = GameManager.globalBeef;
+        int pork = GameManager.globalPork;
+        int rice = GameManager.globalRice;
+        int veggie = GameManager.globalVeggie;
+        int money = GameManager.globalMoney;
+
+        GUI.Box(new Rect(20, 20, 480, 50), $"📦 PANTRY STOCKS:  🥩 Beef: {beef}  |  🥓 Pork: {pork}\n🍚 Rice: {rice}  |  🥦 Veggie: {veggie}   ||   💰 Money: {money} G", pantryBox);
     }
 }

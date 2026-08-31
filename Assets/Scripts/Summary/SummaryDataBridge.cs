@@ -13,29 +13,60 @@ public class SummaryDataBridge : MonoBehaviour
 {
     public static SummaryDataBridge Instance { get; private set; }
 
-    [Header("Expedition Hunt Results")]
-    public string threatRank = "S-RANK";
-    public string threatSubtitle = "BRUTAL VICTORY";
-    public int totalBeastsSlain = 8;
-    public string beastsBreakdown = "3x Dire Beasts, 5x Shadow Monsters";
-    public string timeInWild = "03:45";
-    public int totalDamageDealt = 12500;
-    public List<LootReward> harvestedLoot = new List<LootReward>();
+    // Static persistent fields (Guaranteed to retain real stats across scenes)
+    public static string globalThreatRank = "B-RANK";
+    public static string globalThreatSubtitle = "EXPEDITION COMPLETE";
+    public static int globalBeastsSlain = 0;
+    public static string globalBeastsBreakdown = "0x Monsters Slain";
+    public static string globalTimeInWild = "00:00";
+    public static int globalDamageDealt = 0;
+    public static int globalHarvestedBeef = 0;
+    public static int globalHarvestedPork = 0;
+    public static List<LootReward> globalHarvestedLoot = new List<LootReward>();
 
-    [Header("Harvested Meat Cache")]
-    public int harvestedBeef = 0;
-    public int harvestedPork = 0;
+    // Shift Stats
+    public static int globalDayNumber = 1;
+    public static int globalHappyGuests = 0;
+    public static int globalTotalGuests = 0;
+    public static float globalStarRating = 5.0f;
+    public static int globalDishesServed = 0;
+    public static int globalGrossRevenue = 0;
+    public static int globalKitchenUpkeep = 0;
+    public static int globalCustomerTips = 0;
 
-    [Header("Restaurant Shift Results")]
-    public int dayNumber = 1;
-    public int happyGuests = 18;
-    public int totalGuests = 20;
-    public float starRating = 5.0f;
-    public int dishesServed = 18;
-    public int grossRevenue = 2450;
-    public int kitchenUpkeep = 350;
-    public int customerTips = 300;
-    public int netProfit => (grossRevenue - kitchenUpkeep + customerTips);
+    // Instance accessors for inspector / UI binding
+    public string threatRank => globalThreatRank;
+    public string threatSubtitle => globalThreatSubtitle;
+    public int totalBeastsSlain => globalBeastsSlain;
+    public string beastsBreakdown => globalBeastsBreakdown;
+    public string timeInWild => globalTimeInWild;
+    public int totalDamageDealt => globalDamageDealt;
+    public List<LootReward> harvestedLoot => globalHarvestedLoot;
+
+    public int harvestedBeef
+    {
+        get => globalHarvestedBeef;
+        set => globalHarvestedBeef = value;
+    }
+    public int harvestedPork
+    {
+        get => globalHarvestedPork;
+        set => globalHarvestedPork = value;
+    }
+
+    public int dayNumber
+    {
+        get => globalDayNumber;
+        set => globalDayNumber = value;
+    }
+    public int happyGuests => globalHappyGuests;
+    public int totalGuests => globalTotalGuests;
+    public float starRating => globalStarRating;
+    public int dishesServed => globalDishesServed;
+    public int grossRevenue => globalGrossRevenue;
+    public int kitchenUpkeep => globalKitchenUpkeep;
+    public int customerTips => globalCustomerTips;
+    public int netProfit => (globalGrossRevenue - globalKitchenUpkeep + globalCustomerTips);
 
     private void Awake()
     {
@@ -43,7 +74,6 @@ public class SummaryDataBridge : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            PopulateDefaultDemoDataIfEmpty();
         }
         else if (Instance != this)
         {
@@ -53,100 +83,108 @@ public class SummaryDataBridge : MonoBehaviour
 
     public void PopulateDefaultDemoDataIfEmpty()
     {
-        if (harvestedLoot == null || harvestedLoot.Count == 0)
+        if (globalHarvestedLoot == null || globalHarvestedLoot.Count == 0)
         {
-            harvestedLoot = new List<LootReward>
+            globalHarvestedLoot = new List<LootReward>
             {
-                new LootReward { itemName = "Raw Beef", quantity = Mathf.Max(harvestedBeef, 4), iconName = "meat" },
-                new LootReward { itemName = "Raw Pork", quantity = Mathf.Max(harvestedPork, 3), iconName = "bone" },
-                new LootReward { itemName = "Beast Bones", quantity = 2, iconName = "bone" },
-                new LootReward { itemName = "Wild Herbs", quantity = 5, iconName = "herb" }
+                new LootReward { itemName = "Raw Beef", quantity = globalHarvestedBeef, iconName = "meat" },
+                new LootReward { itemName = "Raw Pork", quantity = globalHarvestedPork, iconName = "meat" }
             };
         }
     }
 
-    public void RecordHuntSession(int kills, int beefAmount, int porkAmount, float timeSeconds, int damage)
+    public static void RecordHuntSession(int kills, int beefAmount, int porkAmount, float timeSeconds, int damage)
     {
-        totalBeastsSlain = kills;
-        harvestedBeef = beefAmount;
-        harvestedPork = porkAmount;
-        totalDamageDealt = damage;
+        globalBeastsSlain = kills;
+        globalHarvestedBeef = beefAmount;
+        globalHarvestedPork = porkAmount;
+        globalDamageDealt = damage;
 
         int mins = Mathf.FloorToInt(timeSeconds / 60f);
         int secs = Mathf.FloorToInt(timeSeconds % 60f);
-        timeInWild = $"{mins:D2}:{secs:D2}";
+        globalTimeInWild = $"{mins:D2}:{secs:D2}";
 
         if (kills >= 10)
         {
-            threatRank = "SS-RANK";
-            threatSubtitle = "LEGENDARY SLAYER";
+            globalThreatRank = "SS-RANK";
+            globalThreatSubtitle = "LEGENDARY SLAYER";
         }
         else if (kills >= 6)
         {
-            threatRank = "S-RANK";
-            threatSubtitle = "BRUTAL VICTORY";
+            globalThreatRank = "S-RANK";
+            globalThreatSubtitle = "BRUTAL VICTORY";
         }
         else if (kills >= 3)
         {
-            threatRank = "A-RANK";
-            threatSubtitle = "SUCCESSFUL HUNT";
+            globalThreatRank = "A-RANK";
+            globalThreatSubtitle = "SUCCESSFUL HUNT";
+        }
+        else if (kills >= 1)
+        {
+            globalThreatRank = "B-RANK";
+            globalThreatSubtitle = "EXPEDITION COMPLETE";
         }
         else
         {
-            threatRank = "B-RANK";
-            threatSubtitle = "SURVIVED";
+            globalThreatRank = "C-RANK";
+            globalThreatSubtitle = "RETREAT";
         }
 
-        beastsBreakdown = $"{kills}x Dungeon Monsters Slain";
+        globalBeastsBreakdown = $"{kills}x Dungeon Monsters Slain";
 
-        harvestedLoot.Clear();
-        if (beefAmount > 0)
-        {
-            harvestedLoot.Add(new LootReward { itemName = "Raw Beef", quantity = beefAmount, iconName = "meat" });
-        }
-        if (porkAmount > 0)
-        {
-            harvestedLoot.Add(new LootReward { itemName = "Raw Pork", quantity = porkAmount, iconName = "bone" });
-        }
-        if (kills > 0)
-        {
-            harvestedLoot.Add(new LootReward { itemName = "Monster Bone", quantity = Mathf.Max(1, kills / 2), iconName = "bone" });
-            harvestedLoot.Add(new LootReward { itemName = "Dungeon Herb", quantity = Mathf.Max(2, kills), iconName = "herb" });
-        }
+        globalHarvestedLoot.Clear();
+        globalHarvestedLoot.Add(new LootReward { itemName = "Raw Beef", quantity = beefAmount, iconName = "meat" });
+        globalHarvestedLoot.Add(new LootReward { itemName = "Raw Pork", quantity = porkAmount, iconName = "meat" });
 
-        if (harvestedLoot.Count == 0)
-        {
-            PopulateDefaultDemoDataIfEmpty();
-        }
+        Debug.Log($"🏹 SummaryDataBridge recorded: Kills={kills}, Beef={beefAmount}, Pork={porkAmount}, Time={globalTimeInWild}");
     }
 
-    public void TransferLootToGameManager()
+    public static void TransferLootToGameManager()
     {
-        if (GameManager.Instance != null)
-        {
-            if (harvestedBeef > 0)
-            {
-                GameManager.Instance.AddHuntingLoot("RawBeef", harvestedBeef);
-            }
-            if (harvestedPork > 0)
-            {
-                GameManager.Instance.AddHuntingLoot("RawPork", harvestedPork);
-            }
+        int beefToAdd = globalHarvestedBeef;
+        int porkToAdd = globalHarvestedPork;
 
-            Debug.Log($"Transferred Hunt Loot to Restaurant: Beef +{harvestedBeef}, Pork +{harvestedPork}");
-            harvestedBeef = 0;
-            harvestedPork = 0;
+        if (beefToAdd > 0)
+        {
+            GameManager.globalBeef += beefToAdd;
+            Debug.Log($"🥩 Transferred +{beefToAdd} Raw Beef into Pantry! Current Total Beef: {GameManager.globalBeef}");
         }
+        if (porkToAdd > 0)
+        {
+            GameManager.globalPork += porkToAdd;
+            Debug.Log($"🥓 Transferred +{porkToAdd} Raw Pork into Pantry! Current Total Pork: {GameManager.globalPork}");
+        }
+
+        globalHarvestedBeef = 0;
+        globalHarvestedPork = 0;
+
+        SaveSystem.Save();
     }
 
-    public void RecordShiftSession(int happy, int total, int dishes, int revenue, int upkeep, int tips, float rating)
+    public static void RecordShiftSession(int happy, int total, int dishes, int revenue, int upkeep, int tips, float rating)
     {
-        happyGuests = happy;
-        totalGuests = total;
-        dishesServed = dishes;
-        grossRevenue = revenue;
-        kitchenUpkeep = upkeep;
-        customerTips = tips;
-        starRating = rating;
+        globalHappyGuests = happy;
+        globalTotalGuests = total;
+        globalDishesServed = dishes;
+        globalGrossRevenue = revenue;
+        globalKitchenUpkeep = upkeep;
+        globalCustomerTips = tips;
+        globalStarRating = rating;
+    }
+
+    public static void ApplyShiftProfitToGameManager()
+    {
+        int profit = (globalGrossRevenue - globalKitchenUpkeep + globalCustomerTips);
+        if (profit > 0)
+        {
+            GameManager.globalMoney += profit;
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.UpdateMoneyText();
+            }
+            Debug.Log($"💰 Added Net Profit +{profit} Gold to GameManager. Total Money: {GameManager.globalMoney}");
+        }
+
+        SaveSystem.Save();
     }
 }

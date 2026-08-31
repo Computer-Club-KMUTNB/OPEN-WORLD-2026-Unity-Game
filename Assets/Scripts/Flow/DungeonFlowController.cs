@@ -174,25 +174,23 @@ public class DungeonFlowController : MonoBehaviour
         Debug.Log("🚪 Extracting from dungeon to restaurant...");
 
         // ดึงจำนวนเนื้อที่เก็บได้
-        int beefCount = 0;
-        int porkCount = 0;
-        if (InventoryManager.Instance != null)
-        {
-            beefCount = InventoryManager.Instance.meatCount;
-            porkCount = InventoryManager.Instance.porkCount;
-        }
+        int beefCount = Mathf.Max(InventoryManager.globalMeatCount, (InventoryManager.Instance != null ? InventoryManager.Instance.meatCount : 0));
+        int porkCount = Mathf.Max(InventoryManager.globalPorkCount, (InventoryManager.Instance != null ? InventoryManager.Instance.porkCount : 0));
+
+        Debug.Log($"🏹 Harvested in hunt -> Beef: {beefCount}, Pork: {porkCount}, Kills: {sessionKills}");
 
         // บันทึกสถิติลง SummaryDataBridge
-        if (SummaryDataBridge.Instance != null)
-        {
-            SummaryDataBridge.Instance.RecordHuntSession(
-                kills: Mathf.Max(sessionKills, beefCount + porkCount),
-                beefAmount: beefCount,
-                porkAmount: porkCount,
-                timeSeconds: sessionDuration,
-                damage: Mathf.Max(sessionDamage, (sessionKills + 1) * 1500)
-            );
-        }
+        SummaryDataBridge.RecordHuntSession(
+            kills: Mathf.Max(sessionKills, beefCount + porkCount),
+            beefAmount: beefCount,
+            porkAmount: porkCount,
+            timeSeconds: sessionDuration,
+            damage: Mathf.Max(sessionDamage, (sessionKills + 1) * 1500)
+        );
+
+        // Reset inventory counter for next dungeon run
+        InventoryManager.globalMeatCount = 0;
+        InventoryManager.globalPorkCount = 0;
 
         // โหลดหน้าสรุปผลการล่า (Expedition Summary)
         string target = summarySceneName;
