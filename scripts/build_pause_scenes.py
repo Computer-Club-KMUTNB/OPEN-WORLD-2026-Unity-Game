@@ -6,7 +6,7 @@ def build_scene(is_hunt=False):
     subtitle_text = "- SAVAGE WILDERNESS EXPEDITION -" if is_hunt else "- COZY RESTAURANT SERVICE -"
     
     settings_title = "<b>FORGE SETTINGS</b>" if is_hunt else "<b>SETTINGS</b>"
-    construction_badge = "⚒️ UNDER FORGING ⚒️" if is_hunt else "🚧 UNDER CONSTRUCTION 🚧"
+    construction_badge = "-- UNDER FORGING --" if is_hunt else "-- UNDER CONSTRUCTION --"
     construction_text = "<color=#FF6B6B><b>COMING IN FUTURE UPDATE</b></color>\\n\\n<size=20><color=#CCCCCC>The blacksmith and alchemist are still forging these controls.\\nAudio tuning, volume adjustments, and graphic options will arrive soon!</color></size>" if is_hunt else "<color=#FF6584><b>COMING IN FUTURE UPDATE</b></color>\\n\\n<size=20><color=#554455>Our little kitchen workshop is still building this menu!\\nAudio volume adjustments and visual settings will be added soon.</color></size>"
     
     bg_guid = "5b3329a54434a6b1f1dcaf03828e95a9" if is_hunt else "153c5edda5c685887d2d010088c46311"

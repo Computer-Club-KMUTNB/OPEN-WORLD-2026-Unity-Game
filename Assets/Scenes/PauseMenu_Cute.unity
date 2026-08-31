@@ -1526,7 +1526,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
-  m_text: "<b>SETTINGS</b>\n<size=18><color=#FFD166>🚧 UNDER CONSTRUCTION 🚧</color></size>"
+  m_text: "<b>SETTINGS</b>\n<size=18><color=#FFD166>-- UNDER CONSTRUCTION --</color></size>"
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 8f586378b4e144a9851e7b34d9b748e4, type: 2}
   m_fontSize: 34
