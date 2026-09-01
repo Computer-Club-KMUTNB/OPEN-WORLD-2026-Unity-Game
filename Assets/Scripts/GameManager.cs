@@ -10,8 +10,8 @@ public class GameManager : MonoBehaviour
     public static int globalMoney = 0;
     public static int globalBeef = 0;
     public static int globalPork = 0;
-    public static int globalRice = 5;
-    public static int globalVeggie = 5;
+    public static int globalRice = 10;
+    public static int globalVeggie = 10;
 
     [Header("ระบบเงิน")]
     public TextMeshProUGUI moneyTextUI; 

@@ -5,6 +5,7 @@ public class FirstPersonController : MonoBehaviour
 {
     [Header("Movement Settings")]
     public float walkSpeed = 5f;
+    public float sprintSpeed = 9f;
     public float mouseSensitivity = 2f;
     public float gravity = -18f; // Downward gravity to prevent floating
 
@@ -79,6 +80,9 @@ public class FirstPersonController : MonoBehaviour
 
             Vector3 move = transform.right * moveSide + transform.forward * moveForward;
 
+            bool isSprinting = Input.GetKey(KeyCode.LeftShift) && moveForward > 0.1f;
+            float currentSpeed = isSprinting ? sprintSpeed : walkSpeed;
+
             if (controller.isGrounded)
             {
                 if (verticalVelocity < 0f)
@@ -91,7 +95,7 @@ public class FirstPersonController : MonoBehaviour
                 verticalVelocity += gravity * Time.deltaTime;
             }
 
-            Vector3 velocityVector = (move * walkSpeed) + (Vector3.up * verticalVelocity);
+            Vector3 velocityVector = (move * currentSpeed) + (Vector3.up * verticalVelocity);
             controller.Move(velocityVector * Time.deltaTime);
         }
     }

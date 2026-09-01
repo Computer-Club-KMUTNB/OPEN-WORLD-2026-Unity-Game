@@ -8,8 +8,8 @@ public class GameSaveData
     public int playerMoney = 0;
     public int rawBeefStock = 0;
     public int rawPorkStock = 0;
-    public int rawRiceStock = 5;
-    public int rawVeggieStock = 5;
+    public int rawRiceStock = 10;
+    public int rawVeggieStock = 10;
     public int dayNumber = 1;
     public string lastSavedTimestamp = "";
 }
@@ -49,8 +49,8 @@ public static class SaveSystem
         GameManager.globalMoney = 0;
         GameManager.globalBeef = 0;
         GameManager.globalPork = 0;
-        GameManager.globalRice = 5;
-        GameManager.globalVeggie = 5;
+        GameManager.globalRice = 10;
+        GameManager.globalVeggie = 10;
         SummaryDataBridge.globalDayNumber = 1;
 
         if (GameManager.Instance != null)

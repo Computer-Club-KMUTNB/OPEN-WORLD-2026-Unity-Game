@@ -11,6 +11,12 @@ public class DoorController : MonoBehaviour
     [Tooltip("ความเร็วในการเลื่อนเปิด/ปิด")]
     public float openSpeed = 3f;
 
+    [Header("Auto Destroy")]
+    [Tooltip("ลบ GameObject ประตูทิ้งเมื่อเปิดเสร็จแล้ว")]
+    public bool destroyOnOpen = true;
+    [Tooltip("เวลารอก่อนลบ (วินาที) หลังจากประตูเลื่อนเปิดสุดแล้ว (0 = ลบหลังจากเปิดสุดทันที)")]
+    public float destroyDelay = 0.2f;
+
     [Header("Camera Shake Settings")]
     public bool shakeCameraOnOpen = true;
     public float shakeDuration = 1.2f;
@@ -25,7 +31,6 @@ public class DoorController : MonoBehaviour
     private Vector3 targetPosition;
     private bool isOpen = false;
     private bool isMoving = false;
-    private Coroutine moveCoroutine;
 
     void Awake()
     {
@@ -48,6 +53,33 @@ public class DoorController : MonoBehaviour
         {
             transform.position = targetPosition;
             isMoving = false;
+
+            if (isOpen)
+            {
+                HandleOpened();
+            }
+        }
+    }
+
+    private void HandleOpened()
+    {
+        if (destroyOnOpen)
+        {
+            // ปิด Collider ทั้งหมดทันที เพื่อไม่ให้ขวางทางผู้เล่น
+            Collider[] colliders = GetComponentsInChildren<Collider>();
+            foreach (var col in colliders)
+            {
+                col.enabled = false;
+            }
+
+            GameObject rootToDestroy = gameObject;
+            if (transform.parent != null && (transform.parent.name.Contains("Door") || transform.parent.name.Contains("door")))
+            {
+                rootToDestroy = transform.parent.gameObject;
+            }
+
+            Debug.Log($"🗑️ ประตู {rootToDestroy.name} เปิดแล้ว ทำการลบออกจากฉาก...");
+            Destroy(rootToDestroy, Mathf.Max(0f, destroyDelay));
         }
     }
 
@@ -72,7 +104,14 @@ public class DoorController : MonoBehaviour
             CameraShake.Instance.Shake(shakeDuration, shakePosMagnitude, shakeRotMagnitude);
         }
 
-        Debug.Log("🚪 ประตูเปิดออกแล้ว!");
+        Debug.Log($"🚪 ประตู {gameObject.name} เปิดออกแล้ว!");
+
+        if (Vector3.Distance(transform.position, targetPosition) < 0.01f || openSpeed <= 0f)
+        {
+            transform.position = targetPosition;
+            isMoving = false;
+            HandleOpened();
+        }
     }
 
     public void CloseDoor()
